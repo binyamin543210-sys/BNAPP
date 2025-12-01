@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BNAPP – לוח שנה פרימיום</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <div class="logo">BNAPP</div>
+    <div class="subtitle">לוח שנה עברי/לועזי – פרימיום</div>
+  </header>
+
+  <main class="layout">
+    <section class="calendar-panel">
+      <div class="month-nav">
+        <button class="nav-btn" onclick="prevMonth()">◀</button>
+        <div class="month-labels">
+          <div id="monthLabel" class="month-main"></div>
+          <div id="hebrewLabel" class="month-sub"></div>
+        </div>
+        <button class="nav-btn" onclick="nextMonth()">▶</button>
+      </div>
+
+      <div class="weekday-row" id="weekdayRow"></div>
+      <div id="calendar" class="calendar-grid"></div>
+    </section>
+
+    <section class="side-panel" id="sidePanel">
+      <h2 id="sideDateTitle">בחר יום</h2>
+      <div class="events-header">
+        <span>אירועים ומשימות</span>
+        <button class="add-btn" onclick="openModal()">＋</button>
+      </div>
+      <ul id="eventList" class="event-list"></ul>
+    </section>
+  </main>
+
+  <!-- מודאל הוספת/עריכת אירוע -->
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalTitle">אירוע חדש</h2>
+      <label>
+        כותרת
+        <input id="eventTitle" placeholder="כותרת האירוע" />
+      </label>
+      <label>
+        תיאור
+        <textarea id="eventDesc" placeholder="תיאור / פרטים"></textarea>
+      </label>
+      <label class="inline-label">
+        <span>סוג</span>
+        <select id="eventType">
+          <option value="event">אירוע</option>
+          <option value="task">משימה</option>
+        </select>
+      </label>
+      <label class="inline-label">
+        <span>סיים?</span>
+        <input type="checkbox" id="eventDone" />
+      </label>
+      <div class="modal-actions">
+        <button class="primary" onclick="saveEvent()">שמור</button>
+        <button onclick="closeModal()">בטל</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase (משמש אם מזינים קונפיג אמיתי, אחרת הכל לוקאלי) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

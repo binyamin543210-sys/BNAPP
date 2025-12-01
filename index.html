@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BNAPP לוח שנה</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0b5ed7" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-icon">B&N</div>
+        <div class="brand-title">לוח שנה</div>
+      </div>
+      <button id="today-btn" class="pill-btn">היום</button>
+    </header>
+
+    <main>
+      <section class="month-header">
+        <div class="month-titles">
+          <div id="hebrew-month" class="month-main hebrew-main"></div>
+          <div id="gregorian-month" class="month-sub greg-main"></div>
+        </div>
+      </section>
+
+      <section class="calendar-card">
+        <div class="weekdays-row">
+          <div>א׳</div>
+          <div>ב׳</div>
+          <div>ג׳</div>
+          <div>ד׳</div>
+          <div>ה׳</div>
+          <div>ו׳</div>
+          <div>ש׳</div>
+        </div>
+        <div id="days-grid" class="days-grid"></div>
+      </section>
+
+      <section id="event-panel" class="event-panel hidden">
+        <div class="event-header">
+          <div>
+            <div id="event-date-greg" class="event-date-main"></div>
+            <div id="event-date-hebrew" class="event-date-sub"></div>
+          </div>
+          <button id="close-panel" class="icon-only-btn">✕</button>
+        </div>
+        <div id="events-list" class="events-list empty">
+          <p class="empty-text">אין אירועים ליום זה</p>
+        </div>
+        <div class="event-form">
+          <input id="new-event-text" type="text" placeholder="הוסף אירוע..." />
+          <button id="add-event-btn" class="pill-btn primary">הוסף</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

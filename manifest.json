@@ -1,0 +1,11 @@
+{
+  "name": "BNAPP PRO+ Calendar",
+  "short_name": "BNAPP",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#4f46e5",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": []
+}

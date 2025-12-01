@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BNAPP PRO+ – לוח שנה</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="light">
+  <header class="top-bar">
+    <div class="logo-area">
+      <div class="logo">BNAPP</div>
+      <div class="subtitle">PRO+ לוח שנה עברי/לועזי</div>
+    </div>
+    <div class="top-controls">
+      <div class="group-box">
+        <span>קוד קבוצה:</span>
+        <input id="groupCode" placeholder="למשל: family2026" />
+        <button id="groupApplyBtn">שמור</button>
+      </div>
+      <button id="darkToggle" class="icon-btn" title="מצב כהה">🌙</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="calendar-panel">
+      <div class="toolbar">
+        <div class="left">
+          <button class="nav-btn" id="prevMonthBtn">◀</button>
+          <div class="month-labels">
+            <div id="monthLabel" class="month-main"></div>
+            <div id="hebrewLabel" class="month-sub"></div>
+          </div>
+          <button class="nav-btn" id="nextMonthBtn">▶</button>
+        </div>
+        <div class="center">
+          <button class="view-btn" data-view="month">חודש</button>
+          <button class="view-btn" data-view="week">שבוע</button>
+          <button class="view-btn" data-view="agenda">רשימה</button>
+        </div>
+        <div class="right">
+          <button class="mini-btn" id="backupBtn">גיבוי</button>
+          <label class="mini-btn file-label">
+            שחזור
+            <input type="file" id="restoreInput" accept="application/json" hidden />
+          </label>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <input id="searchInput" placeholder="חפש אירועים / משימות..." />
+      </div>
+
+      <div id="weekdayRow" class="weekday-row"></div>
+      <div id="calendar" class="calendar-grid"></div>
+      <div id="weekView" class="week-view hidden"></div>
+      <div id="agendaView" class="agenda-view hidden"></div>
+    </section>
+
+    <section class="side-panel" id="sidePanel">
+      <h2 id="sideDateTitle">בחר יום</h2>
+      <div class="stats-row" id="statsRow">
+        <div class="stat">
+          <div class="stat-label">סה״כ</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">משימות</div>
+          <div class="stat-value" id="statTasks">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">בוצע</div>
+          <div class="stat-value" id="statDone">0</div>
+        </div>
+      </div>
+      <div class="events-header">
+        <span>אירועים ומשימות</span>
+        <button class="add-btn" id="addEventBtn">＋</button>
+      </div>
+      <ul id="eventList" class="event-list"></ul>
+    </section>
+  </main>
+
+  <!-- מודאל הוספת/עריכת אירוע -->
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalTitle">אירוע חדש</h2>
+      <label>
+        כותרת
+        <input id="eventTitle" placeholder="כותרת האירוע" />
+      </label>
+      <label>
+        תיאור
+        <textarea id="eventDesc" placeholder="תיאור / פרטים"></textarea>
+      </label>
+      <div class="modal-row">
+        <label>
+          תאריך
+          <input type="date" id="eventDate" />
+        </label>
+        <label>
+          שעה התחלה
+          <input type="time" id="eventStart" />
+        </label>
+        <label>
+          שעה סיום
+          <input type="time" id="eventEnd" />
+        </label>
+      </div>
+      <div class="modal-row">
+        <label>
+          סוג
+          <select id="eventType">
+            <option value="event">אירוע</option>
+            <option value="task">משימה</option>
+          </select>
+        </label>
+        <label>
+          קטגוריה
+          <select id="eventCategory">
+            <option value="general">כללי</option>
+            <option value="family">משפחה</option>
+            <option value="work">עבודה</option>
+            <option value="health">בריאות</option>
+            <option value="holy">קדושה/שבת</option>
+          </select>
+        </label>
+        <label>
+          תזכורת
+          <select id="eventReminder">
+            <option value="none">ללא</option>
+            <option value="5">5 דק׳ לפני</option>
+            <option value="15">15 דק׳ לפני</option>
+            <option value="60">שעה לפני</option>
+          </select>
+        </label>
+      </div>
+      <label class="inline-label">
+        <span>סמן כבוצע</span>
+        <input type="checkbox" id="eventDone" />
+      </label>
+      <div class="modal-actions">
+        <button class="primary" id="saveEventBtn">שמור</button>
+        <button id="cancelEventBtn">בטל</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

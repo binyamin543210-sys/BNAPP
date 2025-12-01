@@ -1,0 +1,13 @@
+body{background:#e3f2fd;margin:0;direction:rtl;font-family:sans-serif;}
+.screen{display:none;max-width:480px;margin:auto;min-height:100vh;background:white;}
+.screen.active{display:block;}
+.card{background:white;margin:40px 15px;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;}
+.btn.primary{background:#1565c0;color:white;width:100%;}
+.top-bar{background:#1565c0;color:white;padding:12px;display:flex;justify-content:space-between;}
+.month-header{padding:10px;text-align:center;display:flex;justify-content:space-between;align-items:center;}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:10px;}
+.day-cell{background:white;border-radius:8px;padding:6px;min-height:55px;cursor:pointer;border:1px solid #ddd;}
+.day-cell.today{border:2px solid #1565c0;}
+.event-panel{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:16px 16px 0 0;padding:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.2);}
+.hidden{display:none;}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BNAPP Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>BNAPP – לוח שנה עברי/לועזי</h1>
+
+  <div id="calendar"></div>
+
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>הוסף אירוע</h2>
+      <input id="eventTitle" placeholder="כותרת האירוע" />
+      <textarea id="eventDesc" placeholder="תיאור"></textarea>
+      <button onclick="saveEvent()">שמור</button>
+      <button onclick="closeModal()">בטל</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

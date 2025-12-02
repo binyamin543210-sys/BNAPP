@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>BNAPP ULTRA – לוח שנה עברי/לועזי</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase v8 (Realtime Database) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="light">
+  <header class="top-bar">
+    <div class="logo-area">
+      <div class="logo">BNAPP</div>
+      <div class="subtitle">ULTRA · לוח שנה עברי / לועזי · חגים · שבת · סנכרון</div>
+    </div>
+    <div class="top-controls">
+      <button id="darkToggle" class="icon-btn" title="מצב כהה / בהיר">🌙</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="calendar-panel">
+      <div class="toolbar">
+        <div class="left">
+          <button class="nav-btn" id="todayBtn">היום</button>
+          <button class="nav-btn" id="prevMonthBtn">◀</button>
+          <div class="month-labels">
+            <div id="monthLabel" class="month-main"></div>
+            <div id="hebrewMonthLabel" class="month-sub"></div>
+          </div>
+          <button class="nav-btn" id="nextMonthBtn">▶</button>
+        </div>
+        <div class="right">
+          <input id="searchInput" placeholder="חיפוש לפי שם אירוע / תיאור..." />
+        </div>
+      </div>
+
+      <div id="weekdayRow" class="weekday-row"></div>
+      <div id="calendar" class="calendar-grid"></div>
+    </section>
+
+    <section class="side-panel">
+      <h2 id="sideDateTitle">בחר יום</h2>
+
+      <div id="holidayBox" class="holiday-box hidden"></div>
+
+      <div class="range-search">
+        <div class="range-title">חיפוש לפי טווח תאריכים</div>
+        <div class="range-row">
+          <input type="date" id="rangeFrom" />
+          <span class="range-sep">־</span>
+          <input type="date" id="rangeTo" />
+          <button id="rangeSearchBtn" class="pill-btn tiny">חפש</button>
+        </div>
+      </div>
+
+      <div class="events-header">
+        <span>אירועים ומשימות ליום זה</span>
+        <button class="add-btn" id="addEventBtn">＋</button>
+      </div>
+      <ul id="eventList" class="event-list"></ul>
+    </section>
+  </main>
+
+  <!-- מודאל הוספה / עריכת אירוע -->
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalTitle">אירוע חדש</h2>
+      <label>
+        כותרת
+        <input id="eventTitle" placeholder="כותרת האירוע" />
+      </label>
+      <label>
+        תיאור
+        <textarea id="eventDesc" placeholder="תיאור / פרטים"></textarea>
+      </label>
+      <div class="modal-row">
+        <label>
+          תאריך
+          <input type="date" id="eventDate" />
+        </label>
+        <label>
+          התחלה
+          <input type="time" id="eventStart" />
+        </label>
+        <label>
+          סיום
+          <input type="time" id="eventEnd" />
+        </label>
+      </div>
+      <div class="modal-row">
+        <label>
+          סוג
+          <select id="eventType">
+            <option value="event">אירוע</option>
+            <option value="task">משימה</option>
+          </select>
+        </label>
+        <label>
+          קטגוריה
+          <select id="eventCategory">
+            <option value="general">כללי</option>
+            <option value="family">משפחה</option>
+            <option value="work">עבודה</option>
+            <option value="health">בריאות</option>
+            <option value="holy">קדושה/שבת</option>
+          </select>
+        </label>
+        <label>
+          תזכורת
+          <select id="eventReminder">
+            <option value="none">ללא</option>
+            <option value="60">שעה לפני</option>
+          </select>
+        </label>
+      </div>
+      <label class="inline-label">
+        <span>התראה עם סאונד</span>
+        <input type="checkbox" id="eventSound" />
+      </label>
+      <label class="inline-label">
+        <span>סמן כבוצע</span>
+        <input type="checkbox" id="eventDone" />
+      </label>
+      <div class="modal-actions">
+        <button class="primary" id="saveEventBtn">שמור</button>
+        <button id="cancelEventBtn">בטל</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bnappBeep" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
+  <script src="core.js"></script>
+  <script src="holidays.js"></script>
+  <script src="sync.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    }
+  </script>
+</body>
+</html>

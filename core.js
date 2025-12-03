@@ -14,10 +14,10 @@ const BNAPP = {
     defaultReminder: 30
   },
 
-  events: {},        // כל האירועים לפי תאריך YYYY-MM-DD
-  holidays: {},      // חגים לכל יום
-  shabbat: {},       // זמני שבת לכל יום
-  weather: {},       // מזג אוויר לכל יום
+  events: {},   // כל האירועים לפי תאריך YYYY-MM-DD
+  holidays: {}, // חגים ותאריך עברי לכל יום
+  shabbat: {},  // זמני שבת / חג
+  weather: {},  // מזג אוויר
 };
 
 // ----------------------------------------------------
@@ -33,7 +33,7 @@ function dateFromKey(k) {
 }
 
 function hebDateKey(y, m, d) {
-  return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
 // ----------------------------------------------------
@@ -81,8 +81,7 @@ function renderCalendar() {
 
   const first = new Date(year, month, 1);
   const firstDay = (first.getDay() + 6) % 7;
-  const days = new Date(year, month + 1, 0).getDate();
-
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
 
   const totalCells = 42;
@@ -97,8 +96,8 @@ function renderCalendar() {
       dNum = prevDays - (firstDay - i - 1);
       dObj = new Date(year, month - 1, dNum);
       cell.classList.add("other-month");
-    } else if (i >= firstDay + days) {
-      dNum = i - (firstDay + days) + 1;
+    } else if (i >= firstDay + daysInMonth) {
+      dNum = i - (firstDay + daysInMonth) + 1;
       dObj = new Date(year, month + 1, dNum);
       cell.classList.add("other-month");
     } else {
@@ -118,7 +117,9 @@ function renderCalendar() {
 
     const heb = document.createElement("div");
     heb.className = "hebrew-date";
-    if (BNAPP.holidays[key]?.hebrew) heb.textContent = BNAPP.holidays[key].hebrew;
+    if (BNAPP.holidays[key] && BNAPP.holidays[key].hebrew) {
+      heb.textContent = BNAPP.holidays[key].hebrew;
+    }
 
     header.appendChild(num);
     header.appendChild(heb);
@@ -157,9 +158,11 @@ function renderCalendar() {
       const chip = document.createElement("div");
       chip.className = "weather-chip";
       chip.textContent =
-        `${BNAPP.weather[key].icon} ${BNAPP.weather[key].max}°`;
+        `${BNAPP.weather[key].icon} ${Math.round(BNAPP.weather[key].max)}°`;
       footer.appendChild(chip);
-    } else footer.appendChild(document.createElement("div"));
+    } else {
+      footer.appendChild(document.createElement("div"));
+    }
 
     // נקודה לאירועים
     if (BNAPP.events[key]?.length) {
@@ -192,6 +195,8 @@ function renderCalendar() {
 // ----------------------------------------------------
 function openDayModal(key) {
   const d = dateFromKey(key);
+  const modal = document.getElementById("day-modal");
+  modal.dataset.key = key;
 
   document.getElementById("modal-date-label").textContent =
     d.toLocaleDateString("he-IL", { weekday: "long", month: "long", day: "numeric" });
@@ -204,14 +209,14 @@ function openDayModal(key) {
 
   if (BNAPP.weather[key]) {
     document.getElementById("modal-weather-label").textContent =
-      `${BNAPP.weather[key].icon} מקס' ${BNAPP.weather[key].max}°`;
+      `${BNAPP.weather[key].icon} מקס' ${Math.round(BNAPP.weather[key].max)}°`;
   } else {
     document.getElementById("modal-weather-label").textContent = "";
   }
 
   renderEvents(key);
 
-  document.getElementById("day-modal").classList.remove("hidden");
+  modal.classList.remove("hidden");
 }
 
 function closeDayModal() {
@@ -278,7 +283,9 @@ function addEvent(key, obj) {
   if (!BNAPP.events[key]) BNAPP.events[key] = [];
   BNAPP.events[key].push(obj);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
@@ -286,7 +293,9 @@ function addEvent(key, obj) {
 function deleteEvent(key, id) {
   BNAPP.events[key] = (BNAPP.events[key] || []).filter(e => e.id !== id);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
@@ -297,7 +306,9 @@ function toggleDone(key, id) {
     if (e.id === id) e.done = !e.done;
   });
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
@@ -308,7 +319,9 @@ function toggleDone(key, id) {
 document.getElementById("event-form").addEventListener("submit", e => {
   e.preventDefault();
 
-  const key = document.querySelector("#day-modal").dataset.key;
+  const modal = document.getElementById("day-modal");
+  const key = modal.dataset.key;
+  if (!key) return;
 
   const ev = {
     id: Date.now(),
@@ -316,7 +329,7 @@ document.getElementById("event-form").addEventListener("submit", e => {
     time: document.getElementById("event-time").value,
     address: document.getElementById("event-address").value.trim(),
     notes: document.getElementById("event-notes").value.trim(),
-    reminder: Number(document.getElementById("event-reminder-mins").value),
+    reminder: Number(document.getElementById("event-reminder-mins").value) || 0,
     done: false
   };
 
@@ -332,36 +345,39 @@ async function loadMonthData() {
   const y = BNAPP.viewYear;
   const m = BNAPP.viewMonth;
 
-  const h = await Holidays.getHolidaysForMonth(y, m);
-  BNAPP.holidays = {};
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
 
-  // Hebrew + holiday
-  for (let d = 1; d <= 31; d++) {
+  BNAPP.holidays = {};
+  BNAPP.shabbat = {};
+  BNAPP.weather = {};
+
+  // --- חגים + עברי ---
+  const monthHolidays = await Holidays.getHolidaysForMonth(y, m);
+
+  for (let d = 1; d <= daysInMonth; d++) {
     const key = hebDateKey(y, m, d);
     const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
 
     const heb = await Holidays.getHebrewDate(key);
+
     BNAPP.holidays[key] = {
-      hebrew: heb,
+      hebrew: heb || "",
       tags: [],
       isShabbat: Holidays.isShabbat(dObj)
     };
 
-    if (h[key]) {
-      const type = Holidays.classifyHoliday(h[key]);
+    if (monthHolidays[key]) {
+      const type = Holidays.classifyHoliday(monthHolidays[key]);
       const tag = Holidays.getHolidayTag(type);
       if (tag) BNAPP.holidays[key].tags.push(tag.text);
     }
   }
 
-  // Shabbat times
-  for (let d = 1; d <= 31; d++) {
+  // --- שבת ---
+  for (let d = 1; d <= daysInMonth; d++) {
     const key = hebDateKey(y, m, d);
-    const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
-
     const sh = await Shabbat.getShabbatTimes(BNAPP.settings.city, key);
+
     if (sh) {
       BNAPP.shabbat[key] = {
         candle: sh.candleLighting,
@@ -371,12 +387,9 @@ async function loadMonthData() {
     }
   }
 
-  // WEATHER
-  for (let d = 1; d <= 31; d++) {
+  // --- מזג אוויר ---
+  for (let d = 1; d <= daysInMonth; d++) {
     const key = hebDateKey(y, m, d);
-    const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
-
     const wx = await Weather.getWeatherForDate(BNAPP.settings.city, key);
     if (wx) BNAPP.weather[key] = wx;
   }
@@ -402,12 +415,29 @@ document.getElementById("settings-save").onclick = () => {
 
   saveSettings();
 
-  if (BNAPP.settings.calendarId) {
+  if (BNAPP.settings.calendarId && window.Sync) {
     Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
   }
 
   loadMonthData();
   document.getElementById("settings-modal").classList.add("hidden");
+};
+
+// בדיקת התראה
+document.getElementById("settings-test-notification").onclick = async () => {
+  if (!("Notification" in window)) {
+    alert("הדפדפן לא תומך בהתראות");
+    return;
+  }
+  let perm = Notification.permission;
+  if (perm !== "granted") {
+    perm = await Notification.requestPermission();
+  }
+  if (perm === "granted") {
+    new Notification("BNAPP", { body: "זוהי התראת בדיקה" });
+  } else {
+    alert("לא ניתן להציג התראות (הרשאה חסרה)");
+  }
 };
 
 // ----------------------------------------------------
@@ -437,6 +467,8 @@ document.getElementById("today-btn").onclick = () => {
   loadMonthData();
 };
 
+document.getElementById("close-day-modal").onclick = closeDayModal;
+
 // ----------------------------------------------------
 // INIT
 // ----------------------------------------------------
@@ -447,7 +479,7 @@ async function initBNAPP() {
   BNAPP.viewYear = BNAPP.today.getFullYear();
   BNAPP.viewMonth = BNAPP.today.getMonth();
 
-  if (BNAPP.settings.calendarId) {
+  if (BNAPP.settings.calendarId && window.Sync) {
     Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
   }
 

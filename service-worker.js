@@ -1,36 +1,53 @@
-// service-worker.js – cache בסיסי בשביל אפליקציה
+//
+// service-worker.js
+//
 
-const CACHE_NAME = 'bnapp-ultra-v8';
+const CACHE = "bnapp-cache-v1";
 const ASSETS = [
-  './',
-  './index.html',
-  './style.css',
-  './core.js',
-  './holidays.js',
-  './sync.js',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  "/",
+  "/index.html",
+  "/style.css",
+  "/core.js",
+  "/holidays.js",
+  "/shabbat.js",
+  "/weather.js",
+  "/sync.js",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png"
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+// התקנה
+self.addEventListener("install", evt => {
+  evt.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+// הפעלה
+self.addEventListener("activate", evt => {
+  evt.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : null))
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     )
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-  event.respondWith(
-    caches.match(req).then(res => res || fetch(req))
+// שרת → קאש
+self.addEventListener("fetch", evt => {
+  evt.respondWith(
+    caches.match(evt.request).then(res => res || fetch(evt.request))
+  );
+});
+
+// התראות PUSH
+self.addEventListener("push", evt => {
+  const data = evt.data?.json() || {};
+  self.registration.showNotification(
+    data.title || "BNAPP",
+    {
+      body: data.body || "תזכורת חדשה מלוח השנה",
+      icon: "icon-192.png"
+    }
   );
 });

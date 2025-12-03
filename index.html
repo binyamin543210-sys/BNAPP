@@ -1,67 +1,117 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>B&N לוח שנה</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css" />
+<link rel="manifest" href="manifest.json" />
 </head>
 
 <body>
 
-<header class="main-header">
-    <h1 class="logo-title">📘 B&N לוח שנה</h1>
-    <button id="themeToggle" class="theme-btn">🌙</button>
+<header class="app-header">
+    <div class="logo">B&N</div>
+    <div class="title">לוח שנה</div>
+    <button id="darkToggle">🌙</button>
 </header>
 
-<nav class="top-tabs">
-    <button class="tab-btn" data-tab="calendar">לוח שנה</button>
-    <button class="tab-btn" data-tab="tasks">משימות</button>
-    <button class="tab-btn" data-tab="daily">היום שלי</button>
-    <button class="tab-btn" data-tab="free">Free time</button>
-</nav>
+<section id="top-info">
+    <div id="hebrew-date"></div>
+    <div id="greg-date"></div>
+</section>
 
-<!-- לוח שנה -->
-<section id="calendar" class="tab-page active">
-    <h2 id="currentMonth"></h2>
+<section id="month-nav">
+    <button id="prevMonth">‹</button>
+    <div id="monthLabel"></div>
+    <button id="nextMonth">›</button>
+</section>
 
-    <div class="calendar-controls">
-        <button id="prevMonth">◀</button>
-        <button id="todayBtn">היום</button>
-        <button id="nextMonth">▶</button>
+<section id="calendar"></section>
+
+<section id="controls">
+    <button class="tabBtn" data-tab="todayTab">היום שלי</button>
+    <button class="tabBtn" data-tab="tasksTab">משימות</button>
+    <button class="tabBtn" data-tab="freeTab">Free Time</button>
+    <button class="tabBtn" data-tab="searchTab">חיפוש</button>
+</section>
+
+<section id="tabs">
+
+    <!-- היום שלי -->
+    <div class="tab" id="todayTab">
+        <h3>היום שלי</h3>
+        <textarea id="myDayInput" placeholder="מה התוכנית להיום?"></textarea>
+        <button onclick="saveMyDay()">שמור</button>
+        <div id="myDayOutput"></div>
     </div>
 
-    <div class="calendar-grid" id="calendarGrid"></div>
-
-    <div id="dayEventsBox" class="day-events-box">
-        <h3>אירועים ליום זה</h3>
-        <div id="eventsList"></div>
-        <button id="addEventBtn" class="add-btn">+ הוסף אירוע</button>
+    <!-- משימות -->
+    <div class="tab" id="tasksTab">
+        <h3>משימות</h3>
+        <ul id="taskList"></ul>
+        <input id="taskInput" placeholder="הוסף משימה..." />
+        <button onclick="addTask()">הוסף</button>
     </div>
+
+    <!-- Free Time -->
+    <div class="tab" id="freeTab">
+        <h3>זמן פנוי</h3>
+        <button onclick="calcFreeTime()">חשב זמן פנוי</button>
+        <div id="freeTimeOutput"></div>
+    </div>
+
+    <!-- חיפוש -->
+    <div class="tab" id="searchTab">
+        <h3>חיפוש אירועים</h3>
+        <input id="searchText" placeholder="חפש לפי שם אירוע..." />
+        <button onclick="searchEvents()">חפש</button>
+        <ul id="searchResults"></ul>
+    </div>
+
 </section>
 
-<!-- משימות -->
-<section id="tasks" class="tab-page">
-    <h2>משימות</h2>
-    <div id="tasksList"></div>
-    <button id="addTaskBtn" class="add-btn">+ משימה חדשה</button>
-</section>
+<!-- חלונית אירוע -->
+<div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>אירוע חדש</h3>
 
-<!-- היום שלי -->
-<section id="daily" class="tab-page">
-    <h2>היום שלי</h2>
-    <textarea id="dailyText" placeholder="מה הפוקוס שלך היום?"></textarea>
-    <button id="saveDailyBtn" class="save-btn">שמור</button>
-</section>
+        <label>שם האירוע:</label>
+        <input id="eventTitle" />
 
-<!-- Free time -->
-<section id="free" class="tab-page">
-    <h2>Free time</h2>
-    <p>כאן יוצגו הזמנים הפנויים שלך לפי האירועים בלוח</p>
-    <div id="freeTimesList"></div>
-</section>
+        <label>תיאור:</label>
+        <textarea id="eventDesc"></textarea>
+
+        <label>שעה:</label>
+        <input type="time" id="eventTime" />
+
+        <label>כתובת (לווייז):</label>
+        <input id="eventAddress" placeholder="רחוב, מספר, עיר" />
+
+        <label>הפוך לאירוע חוזר:</label>
+        <select id="repeatSelect">
+            <option value="none">ללא</option>
+            <option value="daily">יומי</option>
+            <option value="weekly">שבועי</option>
+            <option value="monthly">חודשי</option>
+            <option value="yearly">שנתי</option>
+        </select>
+
+        <label>תזכורת:</label>
+        <select id="reminderSelect">
+            <option value="0">ללא</option>
+            <option value="10">10 דקות לפני</option>
+            <option value="30">30 דקות לפני</option>
+            <option value="60">שעה לפני</option>
+            <option value="120">שעתיים לפני</option>
+            <option value="1440">יום לפני</option>
+        </select>
+
+        <button onclick="saveEvent()">שמור</button>
+        <button onclick="closeEventModal()">סגור</button>
+    </div>
+</div>
 
 <script src="app.js"></script>
 </body>
 </html>
-

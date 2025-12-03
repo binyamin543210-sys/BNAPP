@@ -1,6 +1,6 @@
 //
-// weather.js
-// מבוסס OpenWeatherMap – מדויק, יציב, כולל אייקונים
+// weather.js – גרסה חדשה ללא OneCall API
+// משתמש ב-OpenWeatherMap 5-Day Forecast (חינם, בלי 401)
 //
 
 const WEATHER_API_KEY = "aa23ce141d8b2aa46e8cfcae221850a7";
@@ -35,42 +35,37 @@ async function getCityCoords(city) {
     const data = await res.json();
     if (!data || !data.length) return null;
 
-    return {
-      lat: data[0].lat,
-      lon: data[0].lon,
-    };
+    return { lat: data[0].lat, lon: data[0].lon };
   } catch (e) {
     console.error("Weather coords error:", e);
     return null;
   }
 }
 
-// מביא מזג אוויר ליום מסוים
+// מביא מזג אוויר ליום ספציפי לפי תחזית 5 ימים (3 שעות)
 async function getWeatherForDate(city, isoDate) {
   try {
     const coords = await getCityCoords(city);
     if (!coords) return null;
 
-    // forecast ל־7 ימים – ממנו ניקח את התאריך המתאים
     const url =
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${coords.lat}&lon=${coords.lon}` +
-      `&exclude=minutely,hourly,alerts&units=metric&appid=${WEATHER_API_KEY}`;
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${WEATHER_API_KEY}`;
 
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.daily) return null;
+    if (!data.list) return null;
 
     const target = new Date(isoDate);
-    target.setHours(12); // מייצב השוואות
 
-    // מוצא את היום המתאים מהתחזית
-    const match = data.daily.find(d => {
-      const dt = new Date(d.dt * 1000);
+    // מחפש תחזית של 12:00 (שעת צהריים יציבה)
+    const match = data.list.find(entry => {
+      const dt = new Date(entry.dt * 1000);
       return (
         dt.getFullYear() === target.getFullYear() &&
         dt.getMonth() === target.getMonth() &&
-        dt.getDate() === target.getDate()
+        dt.getDate() === target.getDate() &&
+        dt.getHours() === 12
       );
     });
 
@@ -78,9 +73,9 @@ async function getWeatherForDate(city, isoDate) {
 
     return {
       icon: WEATHER_ICONS[match.weather[0].icon] || "⛅",
-      max: Math.round(match.temp.max),
-      min: Math.round(match.temp.min),
-      desc: match.weather[0].description,
+      max: Math.round(match.main.temp_max),
+      min: Math.round(match.main.temp_min),
+      desc: match.weather[0].description
     };
 
   } catch (e) {

@@ -1,12 +1,10 @@
 {
-  "name": "BNAPP ULTRA – לוח שנה עברי/לועזי",
+  "name": "BNAPP - לוח שנה",
   "short_name": "BNAPP",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
-  "lang": "he",
-  "dir": "rtl",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
   "icons": [
     {
       "src": "icon-192.png",

@@ -1,0 +1,1 @@
+console.log('BNAPP Stage1 loaded');

@@ -1,0 +1,1 @@
+/* sync.js content omitted here for brevity */

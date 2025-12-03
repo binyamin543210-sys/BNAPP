@@ -3,14 +3,11 @@
 // זמני הדלקת נרות / צאת שבת וחג לפי העיר
 //
 
-// ------------------------------
 // קבלת זמני שבת/חג לפי עיר
-// ------------------------------
 async function getShabbatTimes(city, isoDate) {
   if (!city) return null;
 
   try {
-    // תאריך בפורמט YYYY-MM-DD
     const url =
       `https://www.hebcal.com/shabbat/?cfg=json&geo=city&city=${encodeURIComponent(city)}&M=on&lg=h&date=${isoDate}`;
 
@@ -24,10 +21,10 @@ async function getShabbatTimes(city, isoDate) {
 
     for (const item of data.items) {
       if (item.category === "candles") {
-        candleLighting = item.date; // כניסת שבת/חג
+        candleLighting = item.date;
       }
       if (item.category === "havdalah") {
-        havdalah = item.date; // צאת שבת/חג
+        havdalah = item.date;
       }
     }
 
@@ -42,9 +39,7 @@ async function getShabbatTimes(city, isoDate) {
   }
 }
 
-// ------------------------------
-// פונקציה ליצירת טקסט תצוגה
-// ------------------------------
+// טקסט תצוגה
 function formatShabbatLabel(times) {
   if (!times) return "";
 
@@ -63,7 +58,6 @@ function formatShabbatLabel(times) {
   return txt.trim();
 }
 
-// ייצוא מודול
 window.Shabbat = {
   getShabbatTimes,
   formatShabbatLabel,

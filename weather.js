@@ -1,15 +1,14 @@
 //
 // weather.js
-// טעינת מזג אוויר לפי עיר – Open-Meteo API
+// מזג אוויר לפי עיר – Open-Meteo API
 //
 
-// מפה לאייקונים (פשוט ויפה)
 const WEATHER_ICONS = {
-  "sun": "☀️",
-  "partly": "⛅",
-  "cloud": "☁️",
-  "rain": "🌧️",
-  "storm": "⛈️"
+  sun: "☀️",
+  partly: "⛅",
+  cloud: "☁️",
+  rain: "🌧️",
+  storm: "⛈️"
 };
 
 function getWeatherIcon(code) {
@@ -21,9 +20,7 @@ function getWeatherIcon(code) {
   return WEATHER_ICONS.cloud;
 }
 
-// --------------------------------------------------------
-// קבלת קואורדינטות של עיר
-// --------------------------------------------------------
+// קואורדינטות של עיר
 async function getCityCoords(city) {
   try {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&language=he&count=1`;
@@ -43,28 +40,29 @@ async function getCityCoords(city) {
   }
 }
 
-// --------------------------------------------------------
-// מזג אוויר לפי תאריך
-// --------------------------------------------------------
+// מזג אוויר ליום מסוים
 async function getWeatherForDate(city, isoDate) {
   if (!city) return null;
 
   const coords = await getCityCoords(city);
   if (!coords) return null;
 
-  const d = new Date(isoDate);
-  const dayIndex = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / (24 * 3600 * 1000));
-
   const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+    `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}` +
+    `&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto` +
+    `&start_date=${isoDate}&end_date=${isoDate}`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    const wCode = data.daily.weathercode[dayIndex];
-    const tMax = data.daily.temperature_2m_max[dayIndex];
-    const tMin = data.daily.temperature_2m_min[dayIndex];
+    if (!data.daily || !data.daily.weathercode || !data.daily.weathercode.length) {
+      return null;
+    }
+
+    const wCode = data.daily.weathercode[0];
+    const tMax = data.daily.temperature_2m_max[0];
+    const tMin = data.daily.temperature_2m_min[0];
 
     return {
       icon: getWeatherIcon(wCode),

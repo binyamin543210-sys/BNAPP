@@ -1,31 +1,46 @@
 //
-// sync.js
+// sync.js – גרסה מתוקנת לחלוטין
 // סנכרון בין מכשירים – Firebase Realtime Database
 //
 
-// ------- פיירבייס – שים כאן את הפרטים שלך -------
+// -------------------------------------------------
+// ⚠️ חובה למלא את פרטי Firebase שלך כאן:
+// -------------------------------------------------
 const firebaseConfig = {
-  apiKey: "YOUR-KEY",
-  authDomain: "YOUR-DOMAIN",
-  databaseURL: "https://YOUR-PROJECT.firebaseio.com",
-  projectId: "YOUR-ID",
-  storageBucket: "YOUR-BUCKET",
-  messagingSenderId: "ID",
-  appId: "APP-ID"
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
-// נטען רק אם המשתמש הגדיר קוד לוח שנה
+// ---------------------------------------------
+// משתנים פנימיים
+// ---------------------------------------------
+let firebaseApp = null;
 let calendarDB = null;
 
 // ---------------------------------------------
-// הפעלת פיירבייס
+// טעינת פיירבייס בצורה בטוחה
 // ---------------------------------------------
 function initFirebaseIfNeeded(calendarId) {
   if (!calendarId) return;
 
-  if (!window._firebaseLoaded) {
-    firebase.initializeApp(firebaseConfig);
-    window._firebaseLoaded = true;
+  // אם firebase לא קיים בכלל → לא לנסות
+  if (typeof firebase === "undefined") {
+    console.warn("Firebase script missing – sync disabled");
+    return;
+  }
+
+  // טעינה פעם אחת בלבד
+  if (!firebaseApp) {
+    try {
+      firebaseApp = firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+      console.warn("Firebase already initialized, ignoring…");
+    }
   }
 
   calendarDB = firebase.database().ref("calendars/" + calendarId);
@@ -36,29 +51,43 @@ function initFirebaseIfNeeded(calendarId) {
 // ---------------------------------------------
 async function syncSave(dateKey, events) {
   if (!calendarDB) return;
-  await calendarDB.child(dateKey).set(events);
+  try {
+    await calendarDB.child(dateKey).set(events);
+  } catch (e) {
+    console.error("syncSave error:", e);
+  }
 }
 
 // ---------------------------------------------
-// טעינת חודש שלם
+// טעינת חודש שלם מהענן
 // ---------------------------------------------
 async function syncLoadMonth(year, month, onData) {
   if (!calendarDB) return;
 
-  const prefix = `${year}-${String(month+1).padStart(2,"0")}`;
+  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
 
-  calendarDB.once("value", snapshot => {
-    const all = snapshot.val() || {};
+  try {
+    calendarDB.once("value", snapshot => {
+      const all = snapshot.val() || {};
 
-    const filtered = {};
-    Object.keys(all).forEach(k => {
-      if (k.startsWith(prefix)) filtered[k] = all[k];
+      // מחזיר רק תאריכים של אותו חודש
+      const filtered = {};
+      for (const key of Object.keys(all)) {
+        if (key.startsWith(prefix)) {
+          filtered[key] = all[key];
+        }
+      }
+
+      onData(filtered);
     });
-
-    onData(filtered);
-  });
+  } catch (e) {
+    console.error("syncLoadMonth error:", e);
+  }
 }
 
+// ---------------------------------------------
+// ייצוא
+// ---------------------------------------------
 window.Sync = {
   initFirebaseIfNeeded,
   syncSave,

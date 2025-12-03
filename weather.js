@@ -1,77 +1,90 @@
 //
 // weather.js
-// מזג אוויר לפי עיר – Open-Meteo API
+// מבוסס OpenWeatherMap – מדויק, יציב, כולל אייקונים
 //
 
+const WEATHER_API_KEY = "aa23ce141d8b2aa46e8cfcae221850a7";
+
 const WEATHER_ICONS = {
-  sun: "☀️",
-  partly: "⛅",
-  cloud: "☁️",
-  rain: "🌧️",
-  storm: "⛈️"
+  "01d": "☀️",
+  "01n": "🌕",
+  "02d": "⛅",
+  "02n": "☁️",
+  "03d": "☁️",
+  "03n": "☁️",
+  "04d": "☁️",
+  "04n": "☁️",
+  "09d": "🌧️",
+  "09n": "🌧️",
+  "10d": "🌦️",
+  "10n": "🌧️",
+  "11d": "⛈️",
+  "11n": "⛈️",
+  "13d": "❄️",
+  "13n": "❄️",
+  "50d": "🌫️",
+  "50n": "🌫️"
 };
 
-function getWeatherIcon(code) {
-  if (code === 0) return WEATHER_ICONS.sun;
-  if ([1,2].includes(code)) return WEATHER_ICONS.partly;
-  if ([3].includes(code)) return WEATHER_ICONS.cloud;
-  if ([51,53,55,61,63,65,80,81,82].includes(code)) return WEATHER_ICONS.rain;
-  if ([95,96,99].includes(code)) return WEATHER_ICONS.storm;
-  return WEATHER_ICONS.cloud;
-}
-
-// קואורדינטות של עיר
+// מביא קואורדינטות של עיר
 async function getCityCoords(city) {
   try {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&language=he&count=1`;
+    const url =
+      `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${WEATHER_API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
-
-    if (!data || !data.results || data.results.length === 0) return null;
+    if (!data || !data.length) return null;
 
     return {
-      name: data.results[0].name,
-      lat: data.results[0].latitude,
-      lon: data.results[0].longitude,
+      lat: data[0].lat,
+      lon: data[0].lon,
     };
   } catch (e) {
-    console.error("Coords error:", e);
+    console.error("Weather coords error:", e);
     return null;
   }
 }
 
-// מזג אוויר ליום מסוים
+// מביא מזג אוויר ליום מסוים
 async function getWeatherForDate(city, isoDate) {
-  if (!city) return null;
-
-  const coords = await getCityCoords(city);
-  if (!coords) return null;
-
-  const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}` +
-    `&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto` +
-    `&start_date=${isoDate}&end_date=${isoDate}`;
-
   try {
+    const coords = await getCityCoords(city);
+    if (!coords) return null;
+
+    // forecast ל־7 ימים – ממנו ניקח את התאריך המתאים
+    const url =
+      `https://api.openweathermap.org/data/2.5/onecall?lat=${coords.lat}&lon=${coords.lon}` +
+      `&exclude=minutely,hourly,alerts&units=metric&appid=${WEATHER_API_KEY}`;
+
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.daily || !data.daily.weathercode || !data.daily.weathercode.length) {
-      return null;
-    }
+    if (!data.daily) return null;
 
-    const wCode = data.daily.weathercode[0];
-    const tMax = data.daily.temperature_2m_max[0];
-    const tMin = data.daily.temperature_2m_min[0];
+    const target = new Date(isoDate);
+    target.setHours(12); // מייצב השוואות
+
+    // מוצא את היום המתאים מהתחזית
+    const match = data.daily.find(d => {
+      const dt = new Date(d.dt * 1000);
+      return (
+        dt.getFullYear() === target.getFullYear() &&
+        dt.getMonth() === target.getMonth() &&
+        dt.getDate() === target.getDate()
+      );
+    });
+
+    if (!match) return null;
 
     return {
-      icon: getWeatherIcon(wCode),
-      max: tMax,
-      min: tMin
+      icon: WEATHER_ICONS[match.weather[0].icon] || "⛅",
+      max: Math.round(match.temp.max),
+      min: Math.round(match.temp.min),
+      desc: match.weather[0].description,
     };
 
   } catch (e) {
-    console.error("Weather error:", e);
+    console.error("Weather fetch error:", e);
     return null;
   }
 }

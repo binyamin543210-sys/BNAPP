@@ -2,17 +2,8 @@
 //  holidays.js
 //  מודול חגים ועברי עבור BNAPP
 //
-//  משתמש ב- Hebcal API כדי לקבל:
-//  - תאריך עברי לכל יום
-//  - חגים
-//  - שבתות
-//  - צומות
-//  - ראש חודש
-//
 
-// ==========================
-//  קבלת תאריך עברי
-// ==========================
+// תאריך עברי
 async function getHebrewDate(isoDate) {
   try {
     const url = `https://www.hebcal.com/converter?cfg=json&date=${isoDate}&g2h=1&strict=1`;
@@ -25,11 +16,8 @@ async function getHebrewDate(isoDate) {
   }
 }
 
-// ==========================
-//  קבלת רשימת חגים לחודש
-// ==========================
+// חגים לחודש
 async function getHolidaysForMonth(year, month) {
-  // month מגיע 0–11 → hebcal צריך 1–12
   const m = month + 1;
 
   const url =
@@ -59,9 +47,7 @@ async function getHolidaysForMonth(year, month) {
   }
 }
 
-// ==========================
-//  בדיקת אם יום הוא חג / מועד
-// ==========================
+// סיווג חג
 function classifyHoliday(holidayList) {
   if (!holidayList || holidayList.length === 0) return null;
 
@@ -76,16 +62,12 @@ function classifyHoliday(holidayList) {
   return "special";
 }
 
-// ==========================
-//  זיהוי שבת (פשוט – יום שבת)
-// ==========================
+// שבת (יום שבת)
 function isShabbat(dateObj) {
-  return dateObj.getDay() === 6; // שבת
+  return dateObj.getDay() === 6;
 }
 
-// ==========================
-//  תווית לחג/שבת
-// ==========================
+// תווית
 function getHolidayTag(type) {
   if (!type) return null;
 
@@ -103,7 +85,6 @@ function getHolidayTag(type) {
   }
 }
 
-// מאפשר לשאר הקבצים להשתמש:
 window.Holidays = {
   getHebrewDate,
   getHolidaysForMonth,

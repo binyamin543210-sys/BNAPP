@@ -1,273 +1,67 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>B&N לוח שנה</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- אפליקציה / אייקונים (נוסיף בהמשך ב-manifest) -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icon-192.png" />
-
-  <!-- עיצוב -->
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B&N לוח שנה</title>
+<link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div id="app" class="app">
 
-    <!-- כותרת עליונה -->
-    <header class="app-header glass">
-      <div class="header-left">
-        <div class="logo-wrap">
-          <div class="logo-circle">B&N</div>
-          <div class="logo-text">
-            <div class="logo-title">לוח שנה</div>
-            <div class="logo-sub">BNAPP · ULTRA</div>
-          </div>
-        </div>
-      </div>
+<header class="main-header">
+    <h1 class="logo-title">📘 B&N לוח שנה</h1>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+</header>
 
-      <div class="header-center">
-        <button id="todayBtn" class="btn small">היום</button>
-        <button id="dailyFocusBtn" class="btn small">היום שלי</button>
-        <button id="freeTimeBtn" class="btn small">Free time</button>
-        <button id="tasksBtn" class="btn small">משימות</button>
-      </div>
+<nav class="top-tabs">
+    <button class="tab-btn" data-tab="calendar">לוח שנה</button>
+    <button class="tab-btn" data-tab="tasks">משימות</button>
+    <button class="tab-btn" data-tab="daily">היום שלי</button>
+    <button class="tab-btn" data-tab="free">Free time</button>
+</nav>
 
-      <div class="header-right">
-        <button id="yearViewBtn" class="btn small ghost">שנתית</button>
-        <button id="darkToggle" class="icon-btn" title="מצב לילה">🌙</button>
-      </div>
-    </header>
+<!-- לוח שנה -->
+<section id="calendar" class="tab-page active">
+    <h2 id="currentMonth"></h2>
 
-    <!-- בר עליון של היום הנוכחי -->
-    <section class="today-bar glass" id="todayBar">
-      <div class="today-main">
-        <span id="todayHeb" class="pill">תאריך עברי</span>
-        <span id="todayGreg" class="pill">תאריך לועזי</span>
-        <span id="todayTime" class="pill">--:--</span>
-        <span id="todayCount" class="pill">0 אירועים היום</span>
-      </div>
-      <div class="today-extra">
-        <span id="todayShabbat" class="today-note"></span>
-        <span id="todayHoliday" class="today-note"></span>
-      </div>
-    </section>
+    <div class="calendar-controls">
+        <button id="prevMonth">◀</button>
+        <button id="todayBtn">היום</button>
+        <button id="nextMonth">▶</button>
+    </div>
 
-    <!-- פריסה ראשית -->
-    <main class="layout">
-      <!-- לוח שנה -->
-      <section class="calendar glass">
-        <div class="calendar-header">
-          <button id="prevMonthBtn" class="icon-btn">‹</button>
-          <div class="month-title">
-            <div id="monthLabel" class="month-main">דצמבר 2025</div>
-            <div id="hebrewMonthLabel" class="month-sub">כסלו / טבת תשפ"ו</div>
-          </div>
-          <button id="nextMonthBtn" class="icon-btn">›</button>
-        </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
 
-        <!-- שורת ימי השבוע -->
-        <div class="week-row">
-          <span>א'</span>
-          <span>ב'</span>
-          <span>ג'</span>
-          <span>ד'</span>
-          <span>ה'</span>
-          <span>ו'</span>
-          <span>ש'</span>
-        </div>
+    <div id="dayEventsBox" class="day-events-box">
+        <h3>אירועים ליום זה</h3>
+        <div id="eventsList"></div>
+        <button id="addEventBtn" class="add-btn">+ הוסף אירוע</button>
+    </div>
+</section>
 
-        <!-- הגריד של הימים -->
-        <div id="calendarGrid" class="calendar-grid"></div>
-      </section>
+<!-- משימות -->
+<section id="tasks" class="tab-page">
+    <h2>משימות</h2>
+    <div id="tasksList"></div>
+    <button id="addTaskBtn" class="add-btn">+ משימה חדשה</button>
+</section>
 
-      <!-- צד ימין: אירועים ופרטים -->
-      <aside class="side glass">
-        <div class="side-header">
-          <div>
-            <h3 id="sideDayTitle">בחר יום</h3>
-            <div id="sideDaySub" class="side-sub">אין אירועים ליום זה.</div>
-          </div>
-          <button id="addEventBtn" class="btn small primary">+ הוסף אירוע</button>
-        </div>
+<!-- היום שלי -->
+<section id="daily" class="tab-page">
+    <h2>היום שלי</h2>
+    <textarea id="dailyText" placeholder="מה הפוקוס שלך היום?"></textarea>
+    <button id="saveDailyBtn" class="save-btn">שמור</button>
+</section>
 
-        <div class="side-search">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="חיפוש לפי שם אירוע / תיאור..."
-          />
-          <div class="search-range">
-            <input id="searchFrom" type="date" />
-            <span>עד</span>
-            <input id="searchTo" type="date" />
-            <button id="searchBtn" class="btn small">חפש</button>
-          </div>
-        </div>
+<!-- Free time -->
+<section id="free" class="tab-page">
+    <h2>Free time</h2>
+    <p>כאן יוצגו הזמנים הפנויים שלך לפי האירועים בלוח</p>
+    <div id="freeTimesList"></div>
+</section>
 
-        <div id="eventsList" class="events-list">
-          <!-- כאן יופיעו האירועים של היום -->
-        </div>
-      </aside>
-    </main>
-
-    <!-- מגירת משימות -->
-    <section id="tasksDrawer" class="drawer hidden glass">
-      <div class="drawer-header">
-        <h3>משימות</h3>
-        <div>
-          <button id="addTaskBtn" class="icon-btn" title="הוסף משימה">＋</button>
-          <button id="closeTasksBtn" class="icon-btn">✕</button>
-        </div>
-      </div>
-      <div id="tasksList" class="drawer-body">
-        <!-- משימות -->
-      </div>
-    </section>
-
-    <!-- מודאל "היום שלי" -->
-    <section id="dailyModal" class="modal hidden">
-      <div class="modal-content glass">
-        <div class="modal-header">
-          <h3>היום שלי</h3>
-          <button id="closeDailyModal" class="icon-btn">✕</button>
-        </div>
-        <div id="dailyBody" class="modal-body">
-          <!-- תוכן היום שלי -->
-        </div>
-      </div>
-    </section>
-
-    <!-- מודאל Free time -->
-    <section id="freeTimeModal" class="modal hidden">
-      <div class="modal-content glass">
-        <div class="modal-header">
-          <h3>זמן פנוי</h3>
-          <button id="closeFreeTimeModal" class="icon-btn">✕</button>
-        </div>
-        <div id="freeTimeBody" class="modal-body">
-          <!-- זמנים פנויים -->
-        </div>
-      </div>
-    </section>
-
-    <!-- מודאל הוספת / עריכת אירוע -->
-    <section id="eventModal" class="modal hidden">
-      <div class="modal-content glass">
-        <div class="modal-header">
-          <h3 id="eventModalTitle">אירוע חדש</h3>
-          <button id="closeEventModal" class="icon-btn">✕</button>
-        </div>
-
-        <div class="modal-body">
-          <label>
-            כותרת
-            <input id="eventTitleInput" type="text" />
-          </label>
-
-          <label>
-            תיאור
-            <textarea id="eventDescInput"></textarea>
-          </label>
-
-          <div class="grid-2">
-            <label>
-              תאריך
-              <input id="eventDateInput" type="date" />
-            </label>
-            <label>
-              שעה
-              <input id="eventTimeInput" type="time" />
-            </label>
-          </div>
-
-          <label>
-            כתובת (ל-Waze)
-            <input
-              id="eventLocationInput"
-              type="text"
-              placeholder="כתובת / מקום..."
-            />
-          </label>
-
-          <label>
-            חזרתיות
-            <select id="eventRepeatInput">
-              <option value="none">ללא</option>
-              <option value="daily">יומי</option>
-              <option value="weekly">שבועי</option>
-              <option value="monthly">חודשי (תאריך)</option>
-              <option value="yearly">שנתי (לועזי)</option>
-            </select>
-          </label>
-
-          <label>
-            ⏰ התראה לפני האירוע
-            <select id="eventReminderInput">
-              <option value="0">ללא</option>
-              <option value="10">10 דקות לפני</option>
-              <option value="30">30 דקות לפני</option>
-              <option value="60" selected>שעה לפני</option>
-              <option value="120">שעתיים לפני</option>
-              <option value="1440">יום לפני</option>
-              <option value="2880">יומיים לפני</option>
-            </select>
-          </label>
-
-          <label>
-            התראה למי?
-            <select id="eventNotifyTargetInput">
-              <option value="all">כל המכשירים (לוגי בלבד)</option>
-              <option value="device">מכשיר זה בלבד</option>
-            </select>
-          </label>
-
-          <label>
-            צליל התראה
-            <select id="eventSoundInput">
-              <option value="beep-soft">Beep Soft</option>
-              <option value="pling" selected>Pling</option>
-              <option value="bell">Bell</option>
-              <option value="ping-drop">Ping Drop</option>
-              <option value="chime-air">Chime Air</option>
-            </select>
-          </label>
-
-          <button id="previewSoundBtn" class="btn small">
-            השמע צליל
-          </button>
-
-          <div class="checklist-block">
-            <div class="checklist-header">
-              <h4>Checklist לאירוע</h4>
-            </div>
-            <div id="checklistContainer"></div>
-            <div class="checklist-add">
-              <input
-                id="newChecklistInput"
-                type="text"
-                placeholder="הוסף פריט..."
-              />
-              <button id="addChecklistItemBtn" class="icon-btn">＋</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button id="deleteEventBtn" class="btn small ghost danger hidden">
-            מחק
-          </button>
-          <button id="saveEventBtn" class="btn primary">
-            שמור אירוע
-          </button>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- לוגיקה של האפליקציה -->
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
+

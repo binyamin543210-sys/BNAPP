@@ -1,29 +1,24 @@
 //
-// shabbat.js – גרסה מתוקנת ומלאה
-// מערכת שבת/חג חכמה – רק לימים רלוונטיים
+// shabbat.js – זמני שבת/חג לפי עיר, רק לימים שישי/שבת
 //
 
-// **Cache** לשימוש חכם – שלא נטען את Hebcal 31 פעמים כל חודש
 const SHABBAT_CACHE = {};
 
 // קבלת זמני שבת/חג לפי העיר ולפי שבוע
 async function getShabbatTimes(city, isoDate) {
   if (!city) return null;
 
-  // תאריך
   const d = new Date(isoDate);
   const day = d.getDay(); // 0=ראשון ... 5=שישי, 6=שבת
 
-  // אם זה לא יום שישי או שבת – אין צורך להציג זמני שבת
+  // רק שישי/שבת מעניינים
   if (day !== 5 && day !== 6) return null;
 
-  // נחשב את יום שישי של אותו שבוע
+  // מחשבים את יום שישי של אותו שבוע
   const friday = new Date(d);
-  friday.setDate(friday.getDate() - ((day + 2) % 7)); // Friday index
-
+  friday.setDate(friday.getDate() - ((day + 2) % 7));
   const fridayKey = friday.toISOString().split("T")[0];
 
-  // אם כבר שמור בקאש – מחזיר מיד
   if (SHABBAT_CACHE[fridayKey]) return SHABBAT_CACHE[fridayKey];
 
   try {
@@ -41,12 +36,8 @@ async function getShabbatTimes(city, isoDate) {
     let havdalah = null;
 
     for (const item of data.items) {
-      if (item.category === "candles") {
-        candleLighting = item.date;
-      }
-      if (item.category === "havdalah") {
-        havdalah = item.date;
-      }
+      if (item.category === "candles") candleLighting = item.date;
+      if (item.category === "havdalah") havdalah = item.date;
     }
 
     SHABBAT_CACHE[fridayKey] = { candleLighting, havdalah };
@@ -58,8 +49,7 @@ async function getShabbatTimes(city, isoDate) {
   }
 }
 
-
-// פורמט תצוגה
+// טקסט תצוגה
 function formatShabbatLabel(times) {
   if (!times || (!times.candleLighting && !times.havdalah)) return "";
 
@@ -78,9 +68,7 @@ function formatShabbatLabel(times) {
   return txt.trim();
 }
 
-
-// חשיפה
 window.Shabbat = {
   getShabbatTimes,
-  formatShabbatLabel
+  formatShabbatLabel,
 };

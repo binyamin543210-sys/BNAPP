@@ -18,18 +18,41 @@
 <body>
   <div id="app">
 
+    <!-- HEADER -->
     <header class="app-header">
-      <div class="app-title">BNAPP - לוח שנה</div>
       <button id="settings-btn" class="icon-button" title="הגדרות">⚙️</button>
+
+      <div class="app-title-wrapper">
+        <div class="app-title">BNAPP</div>
+        <div class="app-subtitle">לוח שנה עברי־לועזי</div>
+      </div>
+
+      <!-- אפשר בעתיד לשים כאן עוד אייקון -->
+      <div style="width:40px;"></div>
     </header>
 
+    <!-- שורת עיגולים למעלה (לעתיד) -->
+    <section class="top-bubbles">
+      <button class="bubble-btn">1</button>
+      <button class="bubble-btn">2</button>
+      <button class="bubble-btn">3</button>
+      <button class="bubble-btn">4</button>
+    </section>
+
+    <!-- כותרת חודש -->
     <section class="calendar-header">
       <button id="prev-month" class="nav-button">‹</button>
-      <div id="month-label" class="month-label"></div>
+
+      <div class="month-label-wrapper">
+        <div id="month-label" class="month-label"></div>
+        <div id="hebrew-month-label" class="hebrew-month-label"></div>
+      </div>
+
       <button id="next-month" class="nav-button">›</button>
       <button id="today-btn" class="today-button">היום</button>
     </section>
 
+    <!-- כותרת ימי השבוע -->
     <section class="calendar-weekdays">
       <div>א'</div>
       <div>ב'</div>
@@ -40,30 +63,46 @@
       <div>ש'</div>
     </section>
 
+    <!-- הגריד של הימים -->
     <section id="calendar-grid" class="calendar-grid"></section>
   </div>
 
   <!-- חלון יום -->
-  <div id="day-modal" class="modal hidden" data-key="">
+  <div id="day-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
 
     <div class="modal-content">
       <header class="modal-header">
-        <div>
+        <div class="modal-title-block">
           <div id="modal-date-label" class="modal-date-label"></div>
           <div id="modal-hebrew-label" class="modal-hebrew-label"></div>
           <div id="modal-shabbat-label" class="modal-shabbat-label"></div>
-          <div id="modal-weather-label" class="modal-weather-label"></div>
         </div>
-        <button id="close-day-modal" class="icon-button">✕</button>
+
+        <div class="modal-header-actions">
+          <button id="day-weather-btn" class="icon-button" title="מזג אוויר">☁️</button>
+          <button id="day-add-btn" class="icon-button" title="הוסף אירוע / משימה">＋</button>
+          <button id="close-day-modal" class="icon-button">✕</button>
+        </div>
       </header>
 
+      <!-- פס מזג אוויר קטן ליום -->
+      <div id="modal-weather-chip" class="modal-weather-chip"></div>
+
+      <!-- רשימת אירועים / משימות -->
       <section class="modal-section">
         <h3>אירועים ומשימות</h3>
         <ul id="events-list" class="events-list"></ul>
       </section>
 
-      <section class="modal-section">
+      <!-- פירוט מזג אוויר -->
+      <section id="day-weather-panel" class="modal-section hidden">
+        <h3>מזג אוויר ליום זה</h3>
+        <div id="day-weather-content" class="weather-details-card"></div>
+      </section>
+
+      <!-- טופס הוספה (נפתח רק בלחיצה על +) -->
+      <section id="event-form-section" class="modal-section hidden">
         <h3>הוסף אירוע / משימה</h3>
         <form id="event-form">
           <div class="form-row">
@@ -104,7 +143,6 @@
           </div>
         </form>
       </section>
-
     </div>
   </div>
 
@@ -132,12 +170,6 @@
         <div class="form-row">
           <label>זמן ברירת מחדל להתראה (דקות)</label>
           <input id="settings-default-reminder" type="number" min="0" step="5">
-        </div>
-
-        <div class="form-row">
-          <button id="settings-test-notification" class="secondary-button">
-            בדוק התראה עכשיו
-          </button>
         </div>
       </section>
 

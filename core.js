@@ -1,6 +1,5 @@
 //
-// core.js
-// מנוע הלוח שנה BNAPP ULTRA
+// core.js – מנוע הלוח שנה BNAPP
 //
 
 const BNAPP = {
@@ -14,45 +13,36 @@ const BNAPP = {
     defaultReminder: 30
   },
 
-  events: {},   // כל האירועים לפי תאריך YYYY-MM-DD
-  holidays: {}, // חגים/עברי לכל יום
-  shabbat: {},  // זמני שבת לכל יום רלוונטי
-  weather: {},  // מזג אוויר לכל יום
+  events: {},   // אירועים לפי YYYY-MM-DD
+  holidays: {}, // חגים / עברי
+  shabbat: {},  // זמני שבת
+  weather: {}   // מזג אוויר
 };
 
-// ----------------------------------------------------
-// כלי עזר
-// ----------------------------------------------------
+// ---------------- כלי עזר ----------------
 function fmt(d) {
   return d.toISOString().split("T")[0];
 }
-
 function dateFromKey(k) {
   const [y, m, d] = k.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
-
 function hebDateKey(y, m, d) {
-  return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-// ----------------------------------------------------
-// טעינת הגדרות
-// ----------------------------------------------------
+// ---------------- הגדרות ----------------
 function loadSettings() {
   try {
     const raw = localStorage.getItem("bnapp_settings");
     if (raw) Object.assign(BNAPP.settings, JSON.parse(raw));
   } catch {}
 }
-
 function saveSettings() {
   localStorage.setItem("bnapp_settings", JSON.stringify(BNAPP.settings));
 }
 
-// ----------------------------------------------------
-// טעינת אירועים
-// ----------------------------------------------------
+// ------------- אירועים מקומיים -------------
 function loadLocalEvents() {
   try {
     const raw = localStorage.getItem("bnapp_events");
@@ -61,30 +51,17 @@ function loadLocalEvents() {
     BNAPP.events = {};
   }
 }
-
 function saveLocalEvents() {
   localStorage.setItem("bnapp_events", JSON.stringify(BNAPP.events));
 }
 
-// ----------------------------------------------------
-// יצירת לוח השנה
-// ----------------------------------------------------
+// ------------- רינדור לוח שנה -------------
 function renderCalendar() {
   const year = BNAPP.viewYear;
   const month = BNAPP.viewMonth;
 
-  // כותרת חודש לועזי
   document.getElementById("month-label").textContent =
     `${["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"][month]} ${year}`;
-
-  // כותרת חודש עברי (רק פעם אחת למעלה)
-  const hebLabelEl = document.getElementById("hebrew-month-label");
-  if (hebLabelEl) {
-    const keyFirst = fmt(new Date(year, month, 1));
-    const fullHeb = BNAPP.holidays[keyFirst]?.hebrew || "";
-    const parts = fullHeb.split(" ");
-    hebLabelEl.textContent = parts.length > 1 ? parts.slice(1).join(" ") : "";
-  }
 
   const grid = document.getElementById("calendar-grid");
   grid.innerHTML = "";
@@ -99,9 +76,7 @@ function renderCalendar() {
     const cell = document.createElement("div");
     cell.className = "day-cell";
 
-    let dNum;
-    let dObj;
-
+    let dNum, dObj;
     if (i < firstDay) {
       dNum = prevDays - (firstDay - i - 1);
       dObj = new Date(year, month - 1, dNum);
@@ -117,7 +92,7 @@ function renderCalendar() {
 
     const key = fmt(dObj);
 
-    // HEADER
+    // ---- HEADER ----
     const header = document.createElement("div");
     header.className = "day-header";
 
@@ -127,21 +102,16 @@ function renderCalendar() {
 
     const heb = document.createElement("div");
     heb.className = "hebrew-date";
-    const fullHeb = BNAPP.holidays[key]?.hebrew || "";
-    if (fullHeb) {
-      // רק היום העברי (המילה הראשונה) בלי חודש ושנה
-      heb.textContent = fullHeb.split(" ")[0] || "";
-    }
+    if (BNAPP.holidays[key]?.hebrew) heb.textContent = BNAPP.holidays[key].hebrew;
 
     header.appendChild(num);
     header.appendChild(heb);
     cell.appendChild(header);
 
-    // TAGS
+    // ---- TAGS ----
     const tags = document.createElement("div");
     tags.className = "day-tags";
 
-    // שבת
     if (BNAPP.holidays[key]?.isShabbat) {
       const t = document.createElement("span");
       t.className = "tag-pill tag-shabbat";
@@ -149,7 +119,6 @@ function renderCalendar() {
       tags.appendChild(t);
     }
 
-    // חג/מועד
     if (BNAPP.holidays[key]?.tags) {
       BNAPP.holidays[key].tags.forEach(tg => {
         const t = document.createElement("span");
@@ -161,11 +130,10 @@ function renderCalendar() {
 
     cell.appendChild(tags);
 
-    // FOOTER — מזג אוויר / אירועים
+    // ---- FOOTER (מזג אוויר + נקודת אירועים) ----
     const footer = document.createElement("div");
     footer.className = "day-footer";
 
-    // מזג אוויר – צ'יפ קטן
     if (BNAPP.weather[key]) {
       const chip = document.createElement("div");
       chip.className = "weather-chip";
@@ -176,7 +144,6 @@ function renderCalendar() {
       footer.appendChild(document.createElement("div"));
     }
 
-    // נקודה לאירועים
     if (BNAPP.events[key]?.length) {
       const dot = document.createElement("div");
       dot.className = "events-dot";
@@ -185,7 +152,7 @@ function renderCalendar() {
 
     cell.appendChild(footer);
 
-    // היום הנוכחי
+    // היום
     const t = BNAPP.today;
     if (
       dObj.getFullYear() === t.getFullYear() &&
@@ -202,13 +169,9 @@ function renderCalendar() {
   }
 }
 
-// ----------------------------------------------------
-// חלון יום
-// ----------------------------------------------------
+// ------------- חלון יום -------------
 function openDayModal(key) {
   const d = dateFromKey(key);
-  const modal = document.getElementById("day-modal");
-  modal.dataset.key = key;
 
   document.getElementById("modal-date-label").textContent =
     d.toLocaleDateString("he-IL", {
@@ -217,26 +180,24 @@ function openDayModal(key) {
       day: "numeric"
     });
 
+  // עברי מקוצר – רק היום (בלי חודש/שנה)
   document.getElementById("modal-hebrew-label").textContent =
-    BNAPP.holidays[key]?.hebrew || "";
+    BNAPP.holidays[key]?.fullHebrew || "";
 
   document.getElementById("modal-shabbat-label").textContent =
     BNAPP.shabbat[key]?.label || "";
 
-  const wx = BNAPP.weather[key];
-  const chip = document.getElementById("modal-weather-chip");
-  if (wx) {
-    chip.textContent = `${wx.icon} מקס' ${wx.max}° / מינ' ${wx.min}°`;
+  if (BNAPP.weather[key]) {
+    document.getElementById("modal-weather-label").textContent =
+      `${BNAPP.weather[key].icon} מקס' ${BNAPP.weather[key].max}° / מינ' ${BNAPP.weather[key].min}°`;
   } else {
-    chip.textContent = "";
+    document.getElementById("modal-weather-label").textContent = "";
   }
-
-  // ברירת מחדל – טופס סגור, מזג אוויר סגור
-  document.getElementById("event-form-section").classList.add("hidden");
-  document.getElementById("day-weather-panel").classList.add("hidden");
 
   renderEvents(key);
 
+  const modal = document.getElementById("day-modal");
+  modal.dataset.key = key;
   modal.classList.remove("hidden");
 }
 
@@ -244,38 +205,14 @@ function closeDayModal() {
   document.getElementById("day-modal").classList.add("hidden");
 }
 
-// ----------------------------------------------------
-// אירועים
-// ----------------------------------------------------
-function parseTimeToMinutes(t) {
-  if (!t) return 24 * 60 + 1; // בלי שעה – בסוף
-  const [h, m] = t.split(":").map(Number);
-  if (isNaN(h) || isNaN(m)) return 24 * 60 + 1;
-  return h * 60 + m;
-}
-
+// ------------- אירועים -------------
 function renderEvents(key) {
   const list = document.getElementById("events-list");
   list.innerHTML = "";
 
-  let arr = BNAPP.events[key] || [];
+  const arr = BNAPP.events[key] || [];
 
-  // מיון לפי זמן
-  arr = arr.slice().sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time));
-
-  if (!arr.length) {
-    // אין אירועים – אם יש מזג אוויר, נציג הודעה + לחצן
-    const wx = BNAPP.weather[key];
-    const li = document.createElement("li");
-    li.className = "event-item";
-    if (wx) {
-      li.textContent = "אין אירועים ביום זה. מזג האוויר זמין בלחיצה על כפתור הענן ☁️ למעלה.";
-    } else {
-      li.textContent = "אין אירועים או משימות ביום זה.";
-    }
-    list.appendChild(li);
-    return;
-  }
+  arr.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
   arr.forEach(ev => {
     const li = document.createElement("li");
@@ -287,10 +224,9 @@ function renderEvents(key) {
 
     const meta = document.createElement("div");
     meta.className = "event-meta";
-    const parts = [];
-    if (ev.time) parts.push(`שעה: ${ev.time}`);
-    if (ev.address) parts.push(`כתובת: ${ev.address}`);
-    meta.textContent = parts.join(" • ");
+    meta.textContent =
+      (ev.time ? `שעה: ${ev.time} • ` : "") +
+      (ev.address ? `כתובת: ${ev.address}` : "");
 
     const actions = document.createElement("div");
     actions.className = "event-actions";
@@ -320,7 +256,6 @@ function renderEvents(key) {
     li.appendChild(title);
     li.appendChild(meta);
     li.appendChild(actions);
-
     list.appendChild(li);
   });
 }
@@ -329,7 +264,9 @@ function addEvent(key, obj) {
   if (!BNAPP.events[key]) BNAPP.events[key] = [];
   BNAPP.events[key].push(obj);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
@@ -337,7 +274,9 @@ function addEvent(key, obj) {
 function deleteEvent(key, id) {
   BNAPP.events[key] = (BNAPP.events[key] || []).filter(e => e.id !== id);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
@@ -348,134 +287,77 @@ function toggleDone(key, id) {
     if (e.id === id) e.done = !e.done;
   });
   saveLocalEvents();
-  if (BNAPP.settings.calendarId) Sync.syncSave(key, BNAPP.events[key]);
+  if (BNAPP.settings.calendarId && window.Sync) {
+    Sync.syncSave(key, BNAPP.events[key]);
+  }
   renderCalendar();
   renderEvents(key);
 }
 
-// ----------------------------------------------------
-// שמירת אירוע חדש
-// ----------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("event-form").addEventListener("submit", e => {
-    e.preventDefault();
+// ------------- שמירת אירוע חדש -------------
+document.getElementById("event-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const key = document.querySelector("#day-modal").dataset.key;
 
-    const key = document.querySelector("#day-modal").dataset.key;
-
-    const ev = {
-      id: Date.now(),
-      type: document.getElementById("event-type").value,
-      title: document.getElementById("event-title").value.trim(),
-      time: document.getElementById("event-time").value,
-      address: document.getElementById("event-address").value.trim(),
-      notes: document.getElementById("event-notes").value.trim(),
-      reminder: Number(document.getElementById("event-reminder-mins").value),
-      done: false
-    };
-
-    addEvent(key, ev);
-
-    document.getElementById("event-form").reset();
-    document.getElementById("event-form-section").classList.add("hidden");
-  });
-
-  // כפתור סגירת מודל יום
-  document.getElementById("close-day-modal").onclick = closeDayModal;
-
-  // כפתור פלוס – פותח טופס
-  document.getElementById("day-add-btn").onclick = () => {
-    const sec = document.getElementById("event-form-section");
-    sec.classList.toggle("hidden");
+  const ev = {
+    id: Date.now(),
+    title: document.getElementById("event-title").value.trim(),
+    time: document.getElementById("event-time").value,
+    address: document.getElementById("event-address").value.trim(),
+    notes: document.getElementById("event-notes").value.trim(),
+    reminder: Number(document.getElementById("event-reminder-mins").value),
+    done: false
   };
 
-  // כפתור מזג אוויר – מציג/מסתיר פירוט
-  document.getElementById("day-weather-btn").onclick = () => {
-    const panel = document.getElementById("day-weather-panel");
-    const modal = document.getElementById("day-modal");
-    const key = modal.dataset.key;
-    renderDayWeather(key);
-    panel.classList.toggle("hidden");
-  };
+  addEvent(key, ev);
+  document.getElementById("event-form").reset();
 });
 
-// ----------------------------------------------------
-// פירוט מזג אוויר ליום
-// ----------------------------------------------------
-function renderDayWeather(key) {
-  const wx = BNAPP.weather[key];
-  const container = document.getElementById("day-weather-content");
-  container.innerHTML = "";
-
-  if (!wx) {
-    container.textContent = "אין נתוני מזג אוויר זמינים ליום זה.";
-    return;
-  }
-
-  const line1 = document.createElement("div");
-  line1.textContent = `${wx.icon}  טמפרטורה מקסימלית: ${wx.max}°  |  מינימלית: ${wx.min}°`;
-
-  const line2 = document.createElement("div");
-  if (wx.desc) line2.textContent = `תיאור: ${wx.desc}`;
-  else line2.textContent = "";
-
-  container.appendChild(line1);
-  container.appendChild(line2);
-}
-
-// ----------------------------------------------------
-// טעינת נתוני עברי / חג / שבת / מזג אוויר
-// ----------------------------------------------------
+// ------------- טעינת נתונים לחודש -------------
 async function loadMonthData() {
   const y = BNAPP.viewYear;
   const m = BNAPP.viewMonth;
 
-  const h = await Holidays.getHolidaysForMonth(y, m);
   BNAPP.holidays = {};
+  BNAPP.shabbat = {};
+  BNAPP.weather = {};
 
-  // Hebrew + holiday
-  for (let d = 1; d <= 31; d++) {
-    const key = hebDateKey(y, m, d);
+  const holidaysRaw = await Holidays.getHolidaysForMonth(y, m);
+
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  for (let d = 1; d <= daysInMonth; d++) {
     const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
+    const key = fmt(dObj);
 
-    const heb = await Holidays.getHebrewDate(key);
+    // עברי
+    const fullHeb = await Holidays.getHebrewDate(key);
+    const shortHeb = fullHeb ? fullHeb.split(" ")[0] : "";
+
+    const list = holidaysRaw[key] || [];
+    const type = Holidays.classifyHoliday(list);
+    const tag = Holidays.getHolidayTag(type);
+
     BNAPP.holidays[key] = {
-      hebrew: heb,
-      tags: [],
-      isShabbat: Holidays.isShabbat(dObj)
+      hebrew: shortHeb,
+      fullHebrew: fullHeb,
+      tags: tag ? [tag.text] : [],
+      isShabbat: dObj.getDay() === 6
     };
 
-    if (h[key]) {
-      const type = Holidays.classifyHoliday(h[key]);
-      const tag = Holidays.getHolidayTag(type);
-      if (tag) BNAPP.holidays[key].tags.push(tag.text);
+    // זמני שבת – רק לשישי/שבת
+    if (dObj.getDay() === 5 || dObj.getDay() === 6) {
+      const sh = await Shabbat.getShabbatTimes(BNAPP.settings.city, key);
+      if (sh) {
+        BNAPP.shabbat[key] = {
+          candle: sh.candleLighting,
+          havdalah: sh.havdalah,
+          label: Shabbat.formatShabbatLabel(sh)
+        };
+      }
     }
-  }
 
-  // Shabbat times
-  BNAPP.shabbat = {};
-  for (let d = 1; d <= 31; d++) {
-    const key = hebDateKey(y, m, d);
-    const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
-
-    const sh = await Shabbat.getShabbatTimes(BNAPP.settings.city, key);
-    if (sh) {
-      BNAPP.shabbat[key] = {
-        candle: sh.candleLighting,
-        havdalah: sh.havdalah,
-        label: Shabbat.formatShabbatLabel(sh)
-      };
-    }
-  }
-
-  // WEATHER
-  BNAPP.weather = {};
-  for (let d = 1; d <= 31; d++) {
-    const key = hebDateKey(y, m, d);
-    const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
-
+    // מזג אוויר
     const wx = await Weather.getWeatherForDate(BNAPP.settings.city, key);
     if (wx) BNAPP.weather[key] = wx;
   }
@@ -483,9 +365,7 @@ async function loadMonthData() {
   renderCalendar();
 }
 
-// ----------------------------------------------------
-// הגדרות
-// ----------------------------------------------------
+// ------------- הגדרות -------------
 document.getElementById("settings-btn").onclick = () =>
   document.getElementById("settings-modal").classList.remove("hidden");
 
@@ -493,7 +373,8 @@ document.getElementById("close-settings-modal").onclick = () =>
   document.getElementById("settings-modal").classList.add("hidden");
 
 document.getElementById("settings-save").onclick = () => {
-  BNAPP.settings.city = document.getElementById("settings-city").value.trim() || "Jerusalem";
+  BNAPP.settings.city =
+    document.getElementById("settings-city").value.trim() || "Jerusalem";
   BNAPP.settings.calendarId =
     document.getElementById("settings-calendar-id").value.trim();
   BNAPP.settings.defaultReminder =
@@ -501,7 +382,7 @@ document.getElementById("settings-save").onclick = () => {
 
   saveSettings();
 
-  if (BNAPP.settings.calendarId) {
+  if (BNAPP.settings.calendarId && window.Sync) {
     Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
   }
 
@@ -509,9 +390,7 @@ document.getElementById("settings-save").onclick = () => {
   document.getElementById("settings-modal").classList.add("hidden");
 };
 
-// ----------------------------------------------------
-// הזזת חודש
-// ----------------------------------------------------
+// ------------- ניווט חודשים -------------
 document.getElementById("prev-month").onclick = () => {
   BNAPP.viewMonth--;
   if (BNAPP.viewMonth < 0) {
@@ -536,9 +415,7 @@ document.getElementById("today-btn").onclick = () => {
   loadMonthData();
 };
 
-// ----------------------------------------------------
-// INIT
-// ----------------------------------------------------
+// ------------- INIT -------------
 async function initBNAPP() {
   loadSettings();
   loadLocalEvents();
@@ -546,7 +423,7 @@ async function initBNAPP() {
   BNAPP.viewYear = BNAPP.today.getFullYear();
   BNAPP.viewMonth = BNAPP.today.getMonth();
 
-  if (BNAPP.settings.calendarId) {
+  if (BNAPP.settings.calendarId && window.Sync) {
     Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
   }
 

@@ -1,99 +1,101 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BNAPP - לוח שנה עברי־לועזי</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BNAPP - לוח שנה</title>
 
-  <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
 
-  <script defer src="holidays.js"></script>
-  <script defer src="shabbat.js"></script>
-  <script defer src="weather.js"></script>
-  <script defer src="core.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body { background: #eef4ff; }
+  </style>
 </head>
 
 <body>
 
-  <header class="top-bar">
-    <div class="app-title">BNAPP</div>
-    <div class="app-subtitle">לוח שנה עברי־לועזי</div>
-    <button id="settings-btn" class="settings-btn">⚙️</button>
+<div id="app">
+
+  <header class="app-header">
+    <button id="today-btn">היום</button>
+    <div class="app-title">BNAPP<br><span class="sub">לוח שנה עברי־לועזי</span></div>
+    <button id="open-settings">⚙️</button>
   </header>
 
-  <section class="top-buttons">
-    <button class="circle-btn">1</button>
-    <button class="circle-btn">2</button>
-    <button class="circle-btn">3</button>
-    <button class="circle-btn">4</button>
-  </section>
-
-  <section class="calendar-header">
-    <button id="prev-month" class="nav-btn">‹</button>
-    <div>
-      <div id="month-label" class="gregorian"></div>
-      <div id="hebrew-month-label" class="hebrew"></div>
-    </div>
-    <button id="next-month" class="nav-btn">›</button>
-    <button id="today-btn" class="today-btn">היום</button>
-  </section>
-
-  <section class="weekdays">
-    <div>א'</div><div>ב'</div><div>ג'</div><div>ד'</div><div>ה'</div><div>ו'</div><div>ש'</div>
-  </section>
-
-  <section id="calendar-grid" class="calendar-grid"></section>
-
-  <!-- חלון יום -->
-  <div id="day-modal" class="modal hidden">
-    <div class="modal-bg"></div>
-    <div class="modal-box">
-
-      <header class="modal-header">
-        <div class="modal-date">
-          <div id="modal-date-label"></div>
-          <div id="modal-hebrew-label" class="hebrew-date"></div>
-          <div id="modal-shabbat-label" class="shabbat-label"></div>
-        </div>
-
-        <button id="close-day-modal" class="close-btn">✕</button>
-      </header>
-
-      <div class="modal-actions">
-        <button id="add-event-btn" class="modal-action-btn">➕</button>
-        <button id="weather-info-btn" class="modal-action-btn">🌤️</button>
-      </div>
-
-      <section id="weather-info" class="hidden"></section>
-
-      <section class="events-section">
-        <h3>אירועים ומשימות</h3>
-        <ul id="events-list" class="events-list"></ul>
-      </section>
-
-      <section id="event-form-section" class="hidden">
-        <h3>הוספת אירוע / משימה</h3>
-
-        <form id="event-form">
-          <label>כותרת</label>
-          <input id="event-title" required />
-
-          <label>שעה</label>
-          <input id="event-time" type="time" />
-
-          <label>תיאור</label>
-          <textarea id="event-notes"></textarea>
-
-          <label>כתובת (Waze)</label>
-          <input id="event-address" />
-
-          <button class="save-btn" type="submit">שמור</button>
-        </form>
-      </section>
-
-    </div>
+  <div class="top-buttons">
+    <div class="bubble">1</div>
+    <div class="bubble">2</div>
+    <div class="bubble">3</div>
+    <div class="bubble">4</div>
   </div>
+
+  <div class="calendar-header">
+    <button id="prev-month">‹</button>
+    <div class="labels">
+      <div id="month-label" class="month-label"></div>
+      <div id="hebrew-month-label" class="hebrew-label"></div>
+    </div>
+    <button id="next-month">›</button>
+  </div>
+
+  <div class="calendar-weekdays">
+    <div>א'</div>
+    <div>ב'</div>
+    <div>ג'</div>
+    <div>ד'</div>
+    <div>ה'</div>
+    <div>ו'</div>
+    <div>ש'</div>
+  </div>
+
+  <div id="calendar-grid" class="calendar-grid"></div>
+
+</div>
+
+<!-- ================= MODAL יום ================= -->
+
+<div id="day-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2 id="modal-date-label"></h2>
+      <button id="close-day-modal" class="close-btn">✖</button>
+    </div>
+
+    <div id="modal-hebrew-label" class="modal-sub"></div>
+    <div id="modal-shabbat-label" class="modal-sub"></div>
+
+    <div class="modal-buttons">
+      <button id="add-event-btn" class="modal-btn">➕ הוסף אירוע</button>
+      <button id="weather-info-btn" class="modal-btn">🌤️ מזג אוויר</button>
+    </div>
+
+    <div id="weather-info" class="hidden modal-box"></div>
+
+    <h3>אירועים ומשימות</h3>
+    <ul id="events-list"></ul>
+
+    <div id="event-form-section" class="hidden">
+      <form id="event-form">
+        <input id="event-title" placeholder="כותרת" required>
+        <input id="event-time" type="time">
+        <input id="event-address" placeholder="כתובת">
+        <textarea id="event-notes" placeholder="הערות"></textarea>
+        <button class="modal-btn primary">שמור</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script src="holidays.js"></script>
+<script src="shabbat.js"></script>
+<script src="weather.js"></script>
+<script src="core.js"></script>
 
 </body>
 </html>

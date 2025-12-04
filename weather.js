@@ -1,7 +1,7 @@
 //
-// weather.js – תחזית יומית לפי שם עיר (ללא GEO)
-// מציג אייקון + טמפ' מקס' ומינ'
-// 
+// weather.js
+// תחזית לפי שם עיר – OpenWeatherMap 5-day/3h
+//
 
 const WEATHER_API_KEY = "aa23ce141d8b2aa46e8cfcae221850a7";
 
@@ -17,19 +17,18 @@ const WEATHER_ICONS = {
   "50d": "🌫️", "50n": "🌫️"
 };
 
-// מחזיר תחזית ליום מסוים (לפי ISO YYYY-MM-DD)
+// מביא תחזית ליום מסוים (ISO YYYY-MM-DD)
 async function getWeatherForDate(city, isoDate) {
   if (!city || !WEATHER_API_KEY) return null;
 
   try {
-    // תחזית 5 ימים / 3 שעות לפי שם עיר
     const url =
       `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}` +
       `&units=metric&appid=${WEATHER_API_KEY}`;
 
     const res = await fetch(url);
     if (!res.ok) {
-      console.error("Weather HTTP error:", res.status, await res.text());
+      console.error("Weather HTTP error:", res.status);
       return null;
     }
 
@@ -38,7 +37,7 @@ async function getWeatherForDate(city, isoDate) {
 
     const target = new Date(isoDate);
 
-    // ננסה קודם נקודה סביב 12:00
+    // ננסה למצוא נקודה סביב 12:00
     let exact = data.list.find(e => {
       const dt = new Date(e.dt * 1000);
       return (
@@ -49,7 +48,7 @@ async function getWeatherForDate(city, isoDate) {
       );
     });
 
-    // אם אין 12:00 – ניקח את כל הקריאות של אותו יום ונחשב לבד
+    // אם אין 12:00 ליום הזה – נחשב לבד מכל הקריאות של אותו יום
     if (!exact) {
       const sameDay = data.list.filter(e => {
         const dt = new Date(e.dt * 1000);
@@ -76,7 +75,7 @@ async function getWeatherForDate(city, isoDate) {
       };
     }
 
-    // יש נקודה ב-12:00
+    // יש נקודת 12:00
     const iconCode = exact.weather[0].icon;
     return {
       icon: WEATHER_ICONS[iconCode] || "⛅",
@@ -91,4 +90,6 @@ async function getWeatherForDate(city, isoDate) {
   }
 }
 
-window.Weather = { getWeatherForDate };
+window.Weather = {
+  getWeatherForDate,
+};

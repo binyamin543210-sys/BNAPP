@@ -1,6 +1,5 @@
 //
-// weather.js – גרסה חדשה ללא OneCall API
-// משתמש ב-OpenWeatherMap 5-Day Forecast (חינם, בלי 401)
+// weather.js – שימוש ב-OpenWeather 5-day forecast (חינמי, בלי 401)
 //
 
 const WEATHER_API_KEY = "aa23ce141d8b2aa46e8cfcae221850a7";
@@ -32,6 +31,10 @@ async function getCityCoords(city) {
     const url =
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${WEATHER_API_KEY}`;
     const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Geo API error:", await res.text());
+      return null;
+    }
     const data = await res.json();
     if (!data || !data.length) return null;
 
@@ -42,7 +45,7 @@ async function getCityCoords(city) {
   }
 }
 
-// מביא מזג אוויר ליום ספציפי לפי תחזית 5 ימים (3 שעות)
+// מזג אוויר ליום מסוים בעזרת תחזית 5 ימים (3 שעות)
 async function getWeatherForDate(city, isoDate) {
   try {
     const coords = await getCityCoords(city);
@@ -52,13 +55,17 @@ async function getWeatherForDate(city, isoDate) {
       `https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${WEATHER_API_KEY}`;
 
     const res = await fetch(url);
-    const data = await res.json();
+    if (!res.ok) {
+      console.error("Weather API error:", await res.text());
+      return null;
+    }
 
+    const data = await res.json();
     if (!data.list) return null;
 
     const target = new Date(isoDate);
 
-    // מחפש תחזית של 12:00 (שעת צהריים יציבה)
+    // מחפש תחזית ל-12:00
     const match = data.list.find(entry => {
       const dt = new Date(entry.dt * 1000);
       return (

@@ -1,309 +1,293 @@
+/* ————————————
+   בסיס כללי
+———————————— */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #e0f2fe, #f5f3ff);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: linear-gradient(180deg, #dbeafe, #f3e8ff);
   min-height: 100vh;
-  color: #0f172a;
   direction: rtl;
+  color: #0f172a;
 }
 
-#app {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1rem;
-}
+.hidden { display: none; }
 
-/* ---------- HEADER ---------- */
-
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.4rem;
+/* ————————————
+   כותרת עליונה
+———————————— */
+.top-bar {
+  text-align: center;
+  padding: 1rem 0 0.4rem;
 }
 
 .app-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 1px;
+}
+
+.app-subtitle {
+  margin-top: -0.5rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 1.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* ————————————
+   כפתורי עליון (4 עיגולים)
+———————————— */
+.top-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.circle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 100px;
+  border: none;
+  background: white;
+  box-shadow: 0 3px 7px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ————————————
+   כותרת החודש
+———————————— */
+.calendar-header {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.gregorian {
   font-size: 1.4rem;
   font-weight: 700;
 }
 
-.icon-button {
-  border: none;
-  background: #e5e7eb;
-  border-radius: 999px;
-  padding: 0.45rem 0.7rem;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-/* ---------- CALENDAR HEADER ---------- */
-
-.calendar-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.month-label {
-  flex: 1;
+.hebrew {
   text-align: center;
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
-.nav-button {
-  border: none;
-  background: #e5e7eb;
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  cursor: pointer;
-  font-size: 1.1rem;
-}
-
-.today-button {
-  border: none;
+.today-btn {
+  padding: 0.35rem 0.9rem;
   background: #0ea5e9;
+  border: none;
+  border-radius: 50px;
   color: white;
-  border-radius: 999px;
-  padding: 0.35rem 1rem;
+  font-weight: 600;
   cursor: pointer;
   font-size: 0.9rem;
 }
 
-/* ---------- WEEKDAYS ---------- */
+.nav-btn {
+  background: #e2e8f0;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
 
-.calendar-weekdays {
+/* ————————————
+   ימי השבוע
+———————————— */
+.weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #64748b;
-  margin-bottom: 0.3rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: #475569;
 }
 
-/* ---------- GRID ---------- */
-
+/* ————————————
+   גריד ימים
+———————————— */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.35rem;
+  gap: 0.45rem;
+  padding: 0.8rem;
 }
-
-/* ---------- DAY CELL ---------- */
 
 .day-cell {
   background: rgba(255,255,255,0.85);
-  border-radius: 1.1rem;
-  padding: 0.45rem 0.5rem;
-  min-height: 75px;
+  border-radius: 1rem;
+  padding: 0.45rem;
+  min-height: 85px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(15,23,42,0.12);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.12);
 }
 
-.day-cell.other-month { 
-  opacity: 0.4;
-}
-
-.day-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+.other-month {
+  opacity: 0.35;
 }
 
 .day-number {
-  font-size: 1rem;
   font-weight: 700;
+  font-size: 1.1rem;
 }
 
-.hebrew-date {
+.hebrew-date-small {
   font-size: 0.7rem;
-  color: #6b7280;
-}
-
-.day-tags {
-  margin-top: 0.15rem;
-  display: flex;
-  gap: 0.2rem;
-  flex-wrap: wrap;
-}
-
-.tag-pill {
-  font-size: 0.65rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 999px;
+  color: #64748b;
 }
 
 .tag-shabbat {
   background: #fee2e2;
   color: #b91c1c;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.7rem;
+  border-radius: 50px;
+  margin-top: 0.25rem;
 }
 
 .tag-holiday {
   background: #fef3c7;
-  color: #92400e;
-}
-
-.weather-chip {
+  color: #b45309;
+  padding: 0.12rem 0.45rem;
   font-size: 0.7rem;
-  background: #e0f2fe;
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  margin-top: 0.2rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.events-dot {
-  width: 6px;
-  height: 6px;
-  background: #2563eb;
-  border-radius: 999px;
+  border-radius: 50px;
   margin-top: 0.25rem;
 }
 
-.day-today {
-  outline: 2px solid #0ea5e9;
+.weather-chip {
+  margin-top: 0.25rem;
+  background: #dbeafe;
+  padding: 0.12rem 0.45rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
 }
 
-/* ---------- MODALS ---------- */
+/* היום */
+.today {
+  outline: 3px solid #0ea5e9;
+}
 
+/* ————————————
+   מודאל יום
+———————————— */
 .modal {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 50;
 }
 
-.modal.hidden {
-  display: none;
-}
-
-.modal-backdrop {
+.modal-bg {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(0,0,0,0.45);
 }
 
-.modal-content {
+.modal-box {
   position: relative;
-  background: #f9fafb;
-  border-radius: 1.25rem;
+  width: min(420px, 90%);
+  background: #f8fafc;
   padding: 1rem;
-  width: min(480px, 95vw);
-  max-height: 90vh;
-  overflow: auto;
-  box-shadow: 0 20px 50px rgba(15,23,42,0.3);
+  border-radius: 1.2rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  align-items: center;
 }
 
-/* ---------- EVENTS LIST ---------- */
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
 
-.events-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.modal-date {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.15rem;
 }
 
-.event-item {
-  background: #ffffff;
-  padding: 0.45rem 0.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 1px 4px rgba(15,23,42,0.12);
-}
-
-.event-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.event-meta {
-  margin-top: 0.2rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.event-actions {
-  margin-top: 0.4rem;
+.modal-actions {
   display: flex;
+  gap: 0.6rem;
+  margin: 0.6rem 0;
+}
+
+.modal-action-btn {
+  background: #e2e8f0;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* רשימת אירועים */
+.events-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
   gap: 0.4rem;
 }
 
-.event-action-btn {
-  border-radius: 999px;
-  padding: 0.2rem 0.6rem;
-  border: none;
-  cursor: pointer;
-  font-size: 0.75rem;
+.event-item {
+  padding: 0.5rem;
+  background: white;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
 }
 
-.event-action-btn.delete {
-  background: #fee2e2;
-  color: #b91c1c;
+/* טופס */
+#event-form-section {
+  margin-top: 1rem;
 }
 
-.event-action-btn.done {
-  background: #dcfce7;
-  color: #166534;
-}
-
-/* ---------- FORM ---------- */
-
-.form-row {
+#event-form input,
+#event-form textarea {
+  width: 100%;
+  padding: 0.4rem;
+  border-radius: 0.6rem;
+  border: 1px solid #cbd5e1;
   margin-bottom: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  font-size: 0.85rem;
 }
 
-.form-row label {
-  font-weight: 600;
-}
-
-.form-row input,
-.form-row select,
-.form-row textarea {
-  border-radius: 0.75rem;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #e5e7eb;
-  font-size: 0.85rem;
-}
-
-.primary-button {
+.save-btn {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 50px;
+  border: none;
   background: #0ea5e9;
-  color: #ffffff;
-  border: none;
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
-  cursor: pointer;
-}
-
-.secondary-button {
-  background: #e2e8f0;
-  color: #111827;
-  border: none;
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
+  color: white;
   cursor: pointer;
 }

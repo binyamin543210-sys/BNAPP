@@ -1,27 +1,16 @@
 //
-// shabbat.js – זמני הדלקת נרות / צאת שבת לכל שבוע
+// shabbat.js
+// זמני הדלקת נרות / צאת שבת לפי עיר
 //
 
-// מביא זמני שבת/חג עבור שבוע מסוים לפי תאריך (שישי/שבת)
-async function getShabbatTimes(city, isoDate) {
+// מביא זמני שבת לשבוע לפי יום שישי של אותו שבוע
+async function getShabbatTimes(city, fridayIso) {
   if (!city) return null;
 
   try {
-    const d = new Date(isoDate);
-    const day = d.getDay(); // 5=Fri, 6=Sat
-
-    // אם זה שבת – נוריד יום אחורה לשישי
-    let friday = new Date(d);
-    if (day === 6) friday.setDate(friday.getDate() - 1);
-
-    // אם זה לא שישי ולא שבת – אין מה להחזיר
-    if (day !== 5 && day !== 6) return null;
-
-    const key = friday.toISOString().split("T")[0];
-
     const url =
       `https://www.hebcal.com/shabbat/?cfg=json&geo=city&city=${encodeURIComponent(city)}` +
-      `&M=on&lg=h&date=${key}`;
+      `&M=on&lg=h&date=${fridayIso}`;
 
     const res = await fetch(url);
     if (!res.ok) {
@@ -50,7 +39,7 @@ async function getShabbatTimes(city, isoDate) {
   }
 }
 
-// פורמט יפה לתצוגה
+// פורמט טקסט להצגה
 function formatShabbatLabel(times) {
   if (!times) return "";
 
@@ -69,4 +58,7 @@ function formatShabbatLabel(times) {
   return txt.trim();
 }
 
-window.Shabbat = { getShabbatTimes, formatShabbatLabel };
+window.Shabbat = {
+  getShabbatTimes,
+  formatShabbatLabel,
+};

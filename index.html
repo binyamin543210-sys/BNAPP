@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BNAPP - לוח שנה</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- Register service worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(console.error);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="app-title">BNAPP<span class="app-sub">לוח שנה עברי־לועזי</span></div>
+      <button id="settings-btn" class="icon-button" title="הגדרות">⚙️</button>
+    </header>
+
+    <section class="top-bubbles">
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+    </section>
+
+    <section class="calendar-header">
+      <button id="prev-month" class="nav-button">‹</button>
+      <div class="month-wrapper">
+        <div id="month-label" class="month-label"></div>
+        <div id="hebrew-month-label" class="hebrew-month-label"></div>
+      </div>
+      <button id="next-month" class="nav-button">›</button>
+      <button id="today-btn" class="today-button">היום</button>
+    </section>
+
+    <section class="calendar-weekdays">
+      <div>א'</div>
+      <div>ב'</div>
+      <div>ג'</div>
+      <div>ד'</div>
+      <div>ה'</div>
+      <div>ו'</div>
+      <div>ש'</div>
+    </section>
+
+    <section id="calendar-grid" class="calendar-grid"></section>
+  </div>
+
+  <!-- Day modal -->
+  <div id="day-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <header class="modal-header">
+        <div>
+          <div id="modal-date-label" class="modal-date-label"></div>
+          <div id="modal-hebrew-label" class="modal-hebrew-label"></div>
+          <div id="modal-shabbat-label" class="modal-shabbat-label"></div>
+          <div id="modal-weather-label" class="modal-weather-label"></div>
+        </div>
+        <button id="close-day-modal" class="icon-button">✕</button>
+      </header>
+
+      <section class="modal-section">
+        <div class="modal-buttons-row">
+          <button id="toggle-add-form" class="chip-button">➕ הוסף</button>
+          <button id="toggle-weather-details" class="chip-button">🌤️ מזג אוויר</button>
+        </div>
+        <div id="weather-details" class="weather-details hidden"></div>
+      </section>
+
+      <section class="modal-section">
+        <h3>אירועים ומשימות</h3>
+        <ul id="events-list" class="events-list"></ul>
+        <div id="empty-day-hint" class="empty-hint hidden">
+          אין אירועים ליום זה. אם יש תחזית מזג אוויר היא תופיע כאן.
+        </div>
+      </section>
+
+      <section id="event-form-section" class="modal-section hidden">
+        <h3>הוספת אירוע / משימה</h3>
+        <form id="event-form">
+          <div class="form-row">
+            <label>כותרת</label>
+            <input id="event-title" required />
+          </div>
+
+          <div class="form-row">
+            <label>שעה</label>
+            <input id="event-time" type="time" />
+          </div>
+
+          <div class="form-row">
+            <label>כתובת (ל-Waze)</label>
+            <input id="event-address" placeholder="רחוב + עיר" />
+          </div>
+
+          <div class="form-row">
+            <label>תיאור</label>
+            <textarea id="event-notes" rows="2"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label>התראה לפני (דקות, כרגע לשימוש עתידי)</label>
+            <input id="event-reminder-mins" type="number" min="0" step="5" placeholder="ללא" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-button">שמור</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <header class="modal-header">
+        <h2>הגדרות</h2>
+        <button id="close-settings-modal" class="icon-button">✕</button>
+      </header>
+
+      <section class="modal-section">
+        <div class="form-row">
+          <label>עיר למזג אוויר וזמני שבת</label>
+          <input id="settings-city" placeholder="Yavne,IL" />
+        </div>
+
+        <div class="form-row">
+          <label>קוד לוח שנה (לסנכרון בין מכשירים)</label>
+          <input id="settings-calendar-id" placeholder="family-calendar" />
+          <div class="help-text">
+            כל מי שמכניס את אותו קוד יראה את אותם נתונים (ללא סיסמה).
+          </div>
+        </div>
+      </section>
+
+      <footer class="modal-footer">
+        <button id="settings-save" class="primary-button">שמור הגדרות</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- App scripts -->
+  <script src="holidays.js"></script>
+  <script src="shabbat.js"></script>
+  <script src="weather.js"></script>
+  <script src="core.js"></script>
+</body>
+</html>

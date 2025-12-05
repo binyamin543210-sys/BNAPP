@@ -4,7 +4,7 @@
 
 const BNAPP = {
   today: new Date(),
-  viewYear: null,
+  viewYear: null, 
   viewMonth: null,
 
   settings: {

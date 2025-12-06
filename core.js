@@ -204,15 +204,28 @@ function renderCalendar() {
     }
 
     // זמני שבת קצרים בתא (אם יש)
-    if (BNAPP.shabbat[key]) {
+    // זמני שבת קצרים בתא (אם יש)
+    const sh = BNAPP.shabbat[key];
+    if (sh) {
       const sChip = document.createElement("div");
       sChip.className = "shabbat-chip";
-      const txt = BNAPP.shabbat[key]
-        .replace("כניסת שבת:", "כניסה")
-        .replace("צאת שבת:", "יציאה");
-      sChip.textContent = txt;
-      footer.appendChild(sChip);
+      const dow = dObj.getDay();
+      let txt = "";
+
+      if (dow === 5 && sh.candle) {
+        // שישי – רק כניסה
+        txt = `🕯️ ${sh.candle}`;
+      } else if (dow === 6 && sh.havdalah) {
+        // שבת – רק יציאה
+        txt = `⭐ ${sh.havdalah}`;
+      }
+
+      if (txt) {
+        sChip.textContent = txt;
+        footer.appendChild(sChip);
+      }
     }
+
 
     if (BNAPP.events[key]?.length) {
       const dot = document.createElement("div");
@@ -254,8 +267,10 @@ function openDayModal(key) {
   document.getElementById("modal-hebrew-label").textContent =
     BNAPP.holidays[key]?.fullHebrew || "";
 
+  const sh = BNAPP.shabbat[key];
   document.getElementById("modal-shabbat-label").textContent =
-    BNAPP.shabbat[key] || "";
+    sh && sh.full ? sh.full : "";
+
 
   if (BNAPP.weather[key]) {
     const wx = BNAPP.weather[key];

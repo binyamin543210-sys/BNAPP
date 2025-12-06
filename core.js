@@ -264,7 +264,10 @@ if (sh) {
 // --------------------------------------------------
 
 function openDayModal(key) {
-  const d = dateFromKey(key);
+  // תיקון: להפוך את היום ל־12:00 כדי למנוע זליגה בין ימים (timezone fix)
+let d = dateFromKey(key);
+d.setHours(12, 0, 0, 0);
+
 
   document.getElementById("modal-date-label").textContent =
     d.toLocaleDateString("he-IL", {

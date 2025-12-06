@@ -1,65 +1,60 @@
-//
-// shabbat.js — זמני שבת על בסיס Hebcal
-//
+// shabbat.js – FIXED FULL MONTH SHABBAT TIMES
 
-async function getShabbatTimes(city, isoDate) {
-  if (!city) return null;
-
+async function getShabbatMonthTimes(city, year, month) {
   try {
     const url =
-      `https://www.hebcal.com/shabbat/?cfg=json&geo=city&city=${encodeURIComponent(city)}&M=on&lg=h&start=${isoDate}&end=${isoDate}`;
+      `https://www.hebcal.com/hebcal?cfg=json&v=1&year=${year}&month=${month+1}&ss=on&c=on&geo=city&city=${encodeURIComponent(city)}&lg=h`;
 
     const res = await fetch(url);
-    if (!res.ok) {
-      console.error("Shabbat API HTTP error:", res.status);
-      return null;
-    }
-
     const data = await res.json();
-    if (!data.items) return null;
+    if (!data.items) return {};
 
-    let candle = null;   // כניסת שבת (שישי)
-    let havdalah = null; // צאת שבת (שבת)
+    const result = {};
 
-    for (const item of data.items) {
+    data.items.forEach(item => {
+      const dateKey = item.date.split("T")[0];
+
+      // הדלקת נרות
       if (item.category === "candles") {
-        const d = new Date(item.date);
-        if (d.getDay() === 5) candle = item.date;
+        result[dateKey] = result[dateKey] || {};
+        result[dateKey].candleLighting = item.date;
       }
-      if (item.category === "havdalah") {
-        const d = new Date(item.date);
-        if (d.getDay() === 6) havdalah = item.date;
-      }
-    }
 
-    return { candle, havdalah };
+      // צאת שבת
+      if (item.category === "havdalah") {
+        result[dateKey] = result[dateKey] || {};
+        result[dateKey].havdalah = item.date;
+      }
+    });
+
+    return result;
 
   } catch (e) {
-    console.error("Shabbat API error:", e);
-    return null;
+    console.error("Shabbat monthly error:", e);
+    return {};
   }
 }
 
-function formatShabbatForDay(dateObj, times) {
+// פורמט תצוגה
+function formatShabbatLabel(times) {
   if (!times) return "";
 
-  const weekday = dateObj.getDay();
   let txt = "";
 
-  if (weekday === 5 && times.candle) {
-    const t = new Date(times.candle);
-    txt = `🕯️ כניסת שבת: ${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}`;
+  if (times.candleLighting) {
+    const t = new Date(times.candleLighting);
+    txt += `🕯️ כניסת שבת: ${t.getHours().toString().padStart(2,"0")}:${t.getMinutes().toString().padStart(2,"0")}`;
   }
 
-  if (weekday === 6 && times.havdalah) {
+  if (times.havdalah) {
     const t = new Date(times.havdalah);
-    txt = `⭐ צאת שבת: ${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}`;
+    txt += ` • ⭐ צאת שבת: ${t.getHours().toString().padStart(2,"0")}:${t.getMinutes().toString().padStart(2,"0")}`;
   }
 
-  return txt;
+  return txt.trim();
 }
 
 window.Shabbat = {
-  getShabbatTimes,
-  formatShabbatForDay
+  getShabbatMonthTimes,
+  formatShabbatLabel,
 };

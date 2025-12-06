@@ -129,7 +129,10 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   const first = new Date(year, month, 1);
-  const firstDay = first.getDay();
+ // המרה לימים עבריים: א'–ש' במקום Sunday-first
+const jsDay = first.getDay(); // 0=Sunday
+const firstDay = (jsDay + 6) % 7; // 0=Monday ... 6=Sunday
+
   const days = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
 

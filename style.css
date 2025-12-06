@@ -4,87 +4,89 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #e0f2fe 0%, #e0f2fe 55%, #f9fafb 100%);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(circle at top, #e0f2fe 0%, #e2e8f0 40%, #f9fafb 100%);
   min-height: 100vh;
   color: #0f172a;
   direction: rtl;
 }
 
 #app {
-  max-width: 920px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 0.75rem 1rem 2rem;
+  padding: 1rem;
 }
 
-/* ---------- HEADER ---------- */
+/* HEADER */
 
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.3rem;
 }
 
 .app-title-wrap {
-  text-align: center;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .app-title {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
 }
 
 .app-subtitle {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #64748b;
 }
 
 .icon-button {
   border: none;
   background: #e5e7eb;
   border-radius: 999px;
-  padding: 0.4rem 0.7rem;
+  padding: 0.45rem 0.75rem;
   cursor: pointer;
   font-size: 1rem;
 }
 
-/* ---------- TOP ROW ---------- */
+/* TOP CHIPS */
 
-.app-top-row {
+.top-row {
   display: flex;
   justify-content: center;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem;
 }
 
-.circles-row {
+.top-chips {
   display: flex;
   gap: 0.6rem;
 }
 
-.top-circle {
-  width: 44px;
-  height: 44px;
+.top-chip {
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   border: none;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
-  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
-/* ---------- CALENDAR HEADER ---------- */
+/* MONTH HEADER */
 
 .calendar-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
-.month-header {
+.month-label-wrap {
   flex: 1;
   text-align: center;
 }
@@ -96,30 +98,35 @@ body {
 
 .hebrew-month-label {
   font-size: 0.85rem;
-  color: #6b7280;
-  margin-top: 0.1rem;
+  color: #64748b;
 }
 
 .nav-button {
   border: none;
   background: #e5e7eb;
   border-radius: 999px;
-  padding: 0.3rem 0.75rem;
+  padding: 0.3rem 0.7rem;
   cursor: pointer;
   font-size: 1.1rem;
+}
+
+.today-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.3rem;
 }
 
 .today-button {
   border: none;
   background: #0ea5e9;
-  color: white;
+  color: #ffffff;
   border-radius: 999px;
-  padding: 0.3rem 0.9rem;
-  cursor: pointer;
+  padding: 0.3rem 1.1rem;
   font-size: 0.9rem;
+  cursor: pointer;
 }
 
-/* ---------- WEEKDAYS ---------- */
+/* WEEKDAYS */
 
 .calendar-weekdays {
   display: grid;
@@ -131,7 +138,7 @@ body {
   margin-bottom: 0.3rem;
 }
 
-/* ---------- GRID ---------- */
+/* GRID */
 
 .calendar-grid {
   display: grid;
@@ -139,13 +146,13 @@ body {
   gap: 0.35rem;
 }
 
-/* ---------- DAY CELL ---------- */
+/* DAY CELL */
 
 .day-cell {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 1.2rem;
-  padding: 0.45rem 0.5rem;
-  min-height: 78px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1.1rem;
+  padding: 0.35rem 0.4rem 0.4rem;
+  min-height: 74px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -153,26 +160,22 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
-  transition: transform 0.06s ease, box-shadow 0.06s ease;
-}
-
-.day-cell:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+  font-size: 0.78rem;
 }
 
 .day-cell.other-month {
-  opacity: 0.38;
+  opacity: 0.35;
 }
 
 .day-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  margin-bottom: 0.1rem;
 }
 
 .day-number {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
@@ -182,10 +185,10 @@ body {
 }
 
 .day-tags {
-  margin-top: 0.15rem;
   display: flex;
   gap: 0.2rem;
   flex-wrap: wrap;
+  margin-bottom: 0.1rem;
 }
 
 .tag-pill {
@@ -205,10 +208,10 @@ body {
 }
 
 .day-footer {
-  margin-top: 0.25rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.05rem;
 }
 
 .weather-chip {
@@ -219,6 +222,17 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+.shabbat-chip {
+  font-size: 0.7rem;
+  background: #fef2f2;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #b91c1c;
 }
 
 .events-dot {
@@ -232,7 +246,7 @@ body {
   outline: 2px solid #0ea5e9;
 }
 
-/* ---------- MODALS ---------- */
+/* MODALS */
 
 .modal {
   position: fixed;
@@ -267,27 +281,39 @@ body {
 .modal-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 0.75rem;
 }
 
-.modal-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
 .modal-date-label {
+  font-size: 1.05rem;
   font-weight: 700;
 }
 
-.modal-hebrew-label,
-.modal-shabbat-label,
-.modal-weather-label {
-  font-size: 0.8rem;
+.modal-hebrew-label {
+  font-size: 0.9rem;
   color: #4b5563;
 }
 
-/* ---------- EVENTS LIST ---------- */
+.modal-shabbat-label,
+.modal-weather-label {
+  font-size: 0.85rem;
+  margin-top: 0.1rem;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+/* EVENTS */
+
+.events-title {
+  margin-top: 0.7rem;
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+}
 
 .events-list {
   list-style: none;
@@ -317,9 +343,10 @@ body {
 }
 
 .event-actions {
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
   display: flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .event-action-btn {
@@ -340,7 +367,7 @@ body {
   color: #166534;
 }
 
-/* ---------- FORM / BUTTONS ---------- */
+/* FORM */
 
 .form-row {
   margin-bottom: 0.5rem;
@@ -383,65 +410,67 @@ body {
   font-size: 0.9rem;
 }
 
-.primary-button.small,
-.secondary-button.small {
-  padding-inline: 0.7rem;
-  font-size: 0.8rem;
+.full-width {
+  width: 100%;
 }
 
-.modal-actions-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.event-form-wrap.hidden,
-.day-weather-panel.hidden {
-  display: none;
-}
-
-/* ---------- DAY WEATHER PANEL ---------- */
+/* DAY WEATHER PANEL */
 
 .day-weather-panel {
-  margin-top: 0.4rem;
-  padding: 0.5rem 0.6rem;
-  border-radius: 1rem;
   background: #e0f2fe;
+  border-radius: 0.9rem;
+  padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
+  margin-bottom: 0.6rem;
 }
 
-/* ---------- SETTINGS MODAL ---------- */
+/* SETTINGS */
 
-.modal-footer {
-  margin-top: 0.75rem;
-  display: flex;
-  justify-content: flex-end;
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-/* ---------- RECENT CITIES ---------- */
-
-.recent-cities-box {
+.settings-actions {
   display: flex;
   gap: 0.4rem;
+  justify-content: flex-end;
+  margin-top: 0.6rem;
+}
+
+.recent-cities-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.15rem;
+}
+
+.recent-cities {
+  display: flex;
+  gap: 0.3rem;
   flex-wrap: wrap;
-  margin-top: 0.3rem;
 }
 
 .recent-city-btn {
-  background: #e2e8f0;
-  border: none;
-  padding: 0.25rem 0.7rem;
   border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  border: none;
+  background: #e5e7eb;
+  font-size: 0.75rem;
   cursor: pointer;
-  font-size: 0.8rem;
 }
 
-.recent-city-btn:hover {
-  background: #cbd5e1;
+/* UTIL */
+
+.hidden {
+  display: none;
 }
-.shabbat-inline {
-  font-size: 0.7rem;
-  margin-top: 2px;
-  color: #b91c1c;
-  font-weight: 600;
+
+@media (max-width: 600px) {
+  #app {
+    padding: 0.7rem;
+  }
+
+  .day-cell {
+    min-height: 70px;
+  }
 }

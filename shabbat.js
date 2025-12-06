@@ -1,9 +1,5 @@
-// shabbat.js
-// זמני כניסת/יציאת שבת – עובד לכל עיר בעולם באמצעות קואורדינטות
-// שלב 1: ממירים עיר → קואורדינטות (Nominatim)
-// שלב 2: שולחים ל-Hebcal לפי lat/lng
+// shabbat.js – גרסה מתוקנת סופית: מציג את כל שבתות החודש ללא תלות בסדר מה-API
 
-// ---------- כלי עזר ----------
 function shFmt(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -11,7 +7,7 @@ function shFmt(d) {
   return `${y}-${m}-${day}`;
 }
 
-// ---------- הבאת קואורדינטות של עיר ----------
+// ---------- המרת עיר -> קואורדינטות ----------
 async function resolveCityToCoords(city) {
   try {
     const url =
@@ -23,35 +19,23 @@ async function resolveCityToCoords(city) {
     });
 
     const data = await res.json();
-
     if (!data || !data.length) return null;
 
-    return {
-      lat: data[0].lat,
-      lon: data[0].lon
-    };
+    return { lat: data[0].lat, lon: data[0].lon };
   } catch (e) {
-    console.error("City→coords error:", e);
+    console.error("coords error:", e);
     return null;
   }
 }
 
-// ---------- הבאת זמני שבת לכל חודש ----------
+// ---------- זמני שבת לכל החודש ----------
 async function getShabbatForMonth(city, year, month, daysInMonth) {
-  if (!city) return {};
-
-  // 1) למצוא קואורדינטות
   const coords = await resolveCityToCoords(city);
-  if (!coords) {
-    console.warn("לא נמצאו קואורדינטות לעיר:", city);
-    return {};
-  }
-
-  const m = month + 1;
+  if (!coords) return {};
 
   const url =
     "https://www.hebcal.com/shabbat" +
-    `?cfg=json&year=${year}&month=${m}` +
+    `?cfg=json&year=${year}&month=${month + 1}` +
     `&latitude=${coords.lat}&longitude=${coords.lon}` +
     `&tzid=Asia/Jerusalem&M=on`;
 
@@ -61,45 +45,49 @@ async function getShabbatForMonth(city, year, month, daysInMonth) {
 
     if (!data.items) return {};
 
-    const items = data.items;
+    const candles = data.items.filter((i) => i.category === "candles");
+    const havdalot = data.items.filter((i) => i.category === "havdalah");
 
-    const candles = items.filter((i) => i.category === "candles");
-    const havdalot = items.filter((i) => i.category === "havdalah");
-
+    // --- הכנה ---
     const out = {};
-    const pairs = Math.min(candles.length, havdalot.length);
 
-    for (let i = 0; i < pairs; i++) {
-      const c = candles[i];
-      const h = havdalot[i];
+    candles.forEach((c) => {
+      const cDate = new Date(c.date);
+      const friKey = shFmt(cDate);
 
-      const dC = new Date(c.date);
-      const dH = new Date(h.date);
+      // חפש havdalah של מחר (שבת)
+      const satKey = shFmt(new Date(cDate.getTime() + 24 * 3600 * 1000));
 
-      const keyC = shFmt(dC);
-      const keyH = shFmt(dH);
+      const hav = havdalot.find((h) => shFmt(new Date(h.date)) === satKey);
 
       const cTime =
-        dC.getHours().toString().padStart(2, "0") +
+        cDate.getHours().toString().padStart(2, "0") +
         ":" +
-        dC.getMinutes().toString().padStart(2, "0");
+        cDate.getMinutes().toString().padStart(2, "0");
 
-      const hTime =
-        dH.getHours().toString().padStart(2, "0") +
-        ":" +
-        dH.getMinutes().toString().padStart(2, "0");
+      let hTime = "";
+      if (hav) {
+        const hDate = new Date(hav.date);
+        hTime =
+          hDate.getHours().toString().padStart(2, "0") +
+          ":" +
+          hDate.getMinutes().toString().padStart(2, "0");
+      }
 
-      const full = `🕯️ כניסת שבת: ${cTime} • ⭐ צאת שבת: ${hTime}`;
+      const full = `🕯️ כניסת שבת: ${cTime} • ⭐ צאת שבת: ${hTime || "—"}`;
 
       const obj = { candle: cTime, havdalah: hTime, full };
 
-      out[keyC] = obj; // יום שישי
-      out[keyH] = obj; // שבת
-    }
+      // Friday
+      out[friKey] = obj;
+
+      // Saturday
+      if (hav) out[satKey] = obj;
+    });
 
     return out;
   } catch (e) {
-    console.error("Hebcal shabbat error:", e);
+    console.error("shabbat fetch error:", e);
     return {};
   }
 }

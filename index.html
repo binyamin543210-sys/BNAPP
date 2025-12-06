@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BNAPP - לוח שנה עברי-לועזי</title>
+  <title>BNAPP - לוח שנה עברי־לועזי</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
@@ -133,8 +133,13 @@
 
       <section class="modal-section">
         <div class="form-row">
-          <label>עיר למזג אוויר וזמני שבת (כרגע Yavne קבועה בקוד)</label>
-          <input id="settings-city" placeholder="לדוגמה: Yavne">
+          <label>עיר (שבת + מזג אוויר)</label>
+          <input id="settings-city" type="text" placeholder="לדוגמה: Yavne, Jerusalem, Tel Aviv">
+        </div>
+
+        <div class="form-row">
+          <label>ערים אחרונות:</label>
+          <div id="recent-cities" class="recent-cities-box"></div>
         </div>
       </section>
 

@@ -1,5 +1,5 @@
 // core.js
-// מנוע הלוח שנה BNAPP ULTRA – יציב
+// מנוע הלוח שנה BNAPP ULTRA – יציב מתוקן
 
 const BNAPP = {
   today: new Date(),
@@ -17,8 +17,12 @@ const BNAPP = {
 
 // ---- helpers ----
 
+// מפתח תאריך ל-local (בלי UTC)
 function fmt(d) {
-  return d.toISOString().split("T")[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function dateFromKey(k) {
@@ -199,11 +203,10 @@ function renderCalendar() {
       footer.appendChild(chip);
     }
 
-    // זמני שבת קצרים בתא
+    // זמני שבת קצרים בתא (אם יש)
     if (BNAPP.shabbat[key]) {
       const sChip = document.createElement("div");
       sChip.className = "shabbat-chip";
-      // לקחת רק הסמל והשעה (שאר הטקסט מספיק בחלון)
       const txt = BNAPP.shabbat[key]
         .replace("כניסת שבת:", "כניסה")
         .replace("צאת שבת:", "יציאה");
@@ -402,27 +405,18 @@ async function loadMonthData() {
     BNAPP.weather = {};
   }
 
-  // shabbat – לכל שישי ושבת במפה
-  BNAPP.shabbat = {};
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dObj = new Date(y, m, d);
-    const dow = dObj.getDay();
-    if (dow !== 5 && dow !== 6) continue;
-
-    const key = fmt(dObj);
-
-    try {
-      const times = await Shabbat.getShabbatTimes(
+  // shabbat – מפה מוכנה לכל החודש
+  try {
+    BNAPP.shabbat =
+      (await Shabbat.getShabbatForMonth(
         BNAPP.settings.city,
-        key
-      );
-      if (times) {
-        const label = Shabbat.formatShabbatForDay(dObj, times);
-        if (label) BNAPP.shabbat[key] = label;
-      }
-    } catch (e) {
-      console.error("Shabbat load error", e);
-    }
+        y,
+        m,
+        daysInMonth
+      )) || {};
+  } catch (e) {
+    console.error("Shabbat load error", e);
+    BNAPP.shabbat = {};
   }
 
   renderCalendar();

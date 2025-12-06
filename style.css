@@ -417,3 +417,25 @@ body {
   display: flex;
   justify-content: flex-end;
 }
+
+/* ---------- RECENT CITIES ---------- */
+
+.recent-cities-box {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.recent-city-btn {
+  background: #e2e8f0;
+  border: none;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.recent-city-btn:hover {
+  background: #cbd5e1;
+}

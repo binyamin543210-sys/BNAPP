@@ -216,26 +216,32 @@ function renderCalendar() {
     }
 
     // זמני שבת קצרים (רק אם יש)
-    const sh = BNAPP.shabbat[key];
-    if (sh) {
-      const dow = dObj.getDay();
-      const sChip = document.createElement("div");
-      sChip.className = "shabbat-chip";
-      let txt = "";
+    // זמני שבת קצרים בתא
+const sh = BNAPP.shabbat[key];
+if (sh) {
+  const sChip = document.createElement("div");
+  sChip.className = "shabbat-chip";
 
-      if (dow === 5 && sh.candle) {
-        // שישי – כניסה בלבד
-        txt = `🕯️ ${sh.candle}`;
-      } else if (dow === 6 && sh.havdalah) {
-        // שבת – יציאה בלבד
-        txt = `⭐ ${sh.havdalah}`;
-      }
+  const dow = dObj.getDay();
+  let txt = "";
 
-      if (txt) {
-        sChip.textContent = txt;
-        footer.appendChild(sChip);
-      }
-    }
+  // שישי – תמיד כניסה
+  if (dow === 5 && sh.candle) {
+    txt = `🕯️ ${sh.candle}`;
+  }
+
+  // שבת – תמיד יציאה
+  if (dow === 6 && sh.havdalah) {
+    txt = `⭐ ${sh.havdalah}`;
+  }
+
+  // אם יש מה להציג — נציג
+  if (txt) {
+    sChip.textContent = txt;
+    footer.appendChild(sChip);
+  }
+}
+
 
     // נקודת אירועים
     if (BNAPP.events[key]?.length) {

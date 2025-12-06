@@ -1,11 +1,18 @@
 // shabbat.js
 // זמני כניסת / יציאת שבת לכל החודש לפי עיר
+// מחזיר מפת תאריכים: YYYY-MM-DD -> { candle, havdalah, full }
 
 function pad(n) {
   return String(n).padStart(2, "0");
 }
 
-// מחזיר מפה: YYYY-MM-DD -> טקסט מוכן לתצוגה
+function timeFromISO(iso) {
+  const d = new Date(iso);
+  const hh = pad(d.getHours());
+  const mm = pad(d.getMinutes());
+  return `${hh}:${mm}`;
+}
+
 async function getShabbatForMonth(city, year, month, daysInMonth) {
   if (!city) return {};
 
@@ -24,56 +31,45 @@ async function getShabbatForMonth(city, year, month, daysInMonth) {
 
     if (!data.items) return {};
 
-    // dateKey -> { candle?: iso, havdalah?: iso }
-    const map = {};
+    const candles = [];
+    const havdalot = [];
 
     for (const item of data.items) {
-      if (item.category !== "candles" && item.category !== "havdalah") continue;
-
-      const dateKey = item.date.split("T")[0]; // YYYY-MM-DD
-
-      if (!map[dateKey]) map[dateKey] = {};
-
       if (item.category === "candles") {
-        map[dateKey].candle = item.date;
+        candles.push(item);
       }
       if (item.category === "havdalah") {
-        map[dateKey].havdalah = item.date;
+        havdalot.push(item);
       }
     }
 
-    // בונים טקסט מוכן לכל יום
     const out = {};
 
-    Object.keys(map).forEach((key) => {
-      const info = map[key];
-      let txt = "";
+    const count = Math.min(candles.length, havdalot.length);
 
-      if (info.candle) {
-        const t = new Date(info.candle);
-        txt += `🕯️ כניסת שבת: ${t
-          .getHours()
-          .toString()
-          .padStart(2, "0")}:${t
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}`;
-      }
+    for (let i = 0; i < count; i++) {
+      const c = candles[i];
+      const h = havdalot[i];
 
-      if (info.havdalah) {
-        const t = new Date(info.havdalah);
-        if (txt) txt += " • ";
-        txt += `⭐ צאת שבת: ${t
-          .getHours()
-          .toString()
-          .padStart(2, "0")}:${t
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}`;
-      }
+      const cTime = timeFromISO(c.date);
+      const hTime = timeFromISO(h.date);
 
-      out[key] = txt;
-    });
+      const full =
+        `🕯️ כניסת שבת: ${cTime}` +
+        ` • ⭐ צאת שבת: ${hTime}`;
+
+      const cKey = c.date.split("T")[0]; // יום שישי
+      const hKey = h.date.split("T")[0]; // מוצ"ש
+
+      if (!out[cKey]) out[cKey] = { candle: null, havdalah: null, full: "" };
+      if (!out[hKey]) out[hKey] = { candle: null, havdalah: null, full: "" };
+
+      out[cKey].candle = cTime;
+      out[cKey].full = full;
+
+      out[hKey].havdalah = hTime;
+      out[hKey].full = full;
+    }
 
     return out;
   } catch (e) {

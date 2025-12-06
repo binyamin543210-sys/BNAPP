@@ -1,32 +1,62 @@
-// shabbat.js
-// זמני שבת
+// holidays.js
+// חגים + תאריכים עבריים + שבת
 
-const Shabbat = {
-  async getShabbatTimes(city, dateKey) {
+const Holidays = {
+  async getHebrewDate(dateKey) {
     try {
-      const url = `https://www.hebcal.com/shabbat/?cfg=json&city=${city}&geo=city&year=${dateKey.slice(0,4)}&month=${dateKey.slice(5,7)}&m=${dateKey.slice(8,10)}`;
+      const url = `https://www.hebcal.com/converter?cfg=json&date=${dateKey}`;
       const res = await fetch(url);
       const data = await res.json();
-
-      if (!data.items) return null;
-
-      let candle = null, havdalah = null;
-
-      data.items.forEach(i => {
-        if (i.category === "candles") candle = i.title;
-        if (i.category === "havdalah") havdalah = i.title;
-      });
-
-      return { candleLighting: candle, havdalah };
+      return data.hebrew || "";
     } catch {
-      return null;
+      return "";
     }
   },
 
-  formatShabbatLabel(obj) {
-    if (!obj || (!obj.candleLighting && !obj.havdalah)) return "";
-    return `כניסה: ${obj.candleLighting || "-"} | יציאה: ${obj.havdalah || "-"}`;
+  async getHolidaysForMonth(year, month) {
+    try {
+      const start = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+      const end = `${year}-${String(month + 1).padStart(2, "0")}-31`;
+
+      const url =
+        `https://www.hebcal.com/hebcal/?v=1&cfg=json&year=${year}&month=${month + 1}&maj=on&min=on&mod=on&i=on`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const out = {};
+
+      data.items.forEach(item => {
+        const d = item.date;
+        if (!out[d]) out[d] = [];
+        out[d].push(item);
+      });
+
+      return out;
+    } catch {
+      return {};
+    }
+  },
+
+  classifyHoliday(item) {
+    if (!item) return null;
+    if (item.hebrew.includes("שבת")) return "shabbat";
+    if (item.category === "holiday") return "holiday";
+    if (item.category === "roshchodesh") return "roshchodesh";
+    return null;
+  },
+
+  getHolidayTag(type) {
+    if (!type) return null;
+    return {
+      shabbat: { text: "שבת" },
+      holiday: { text: "חג" },
+      roshchodesh: { text: "ר\"ח" }
+    }[type];
+  },
+
+  isShabbat(dateObj) {
+    return dateObj.getDay() === 6; // שבת
   }
 };
 
-window.Shabbat = Shabbat;
+window.Holidays = Holidays;

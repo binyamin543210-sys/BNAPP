@@ -33,7 +33,6 @@ async function getCityCoords(city) {
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${WEATHER_API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
-
     if (!data || !data.length) return null;
 
     const coords = { lat: data[0].lat, lon: data[0].lon };

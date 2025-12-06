@@ -1,43 +1,45 @@
-
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #e0f2fe, #eef2ff 55%, #f9fafb 100%);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #e0f2fe 0%, #e0f2fe 55%, #f9fafb 100%);
   min-height: 100vh;
   color: #0f172a;
   direction: rtl;
 }
 
 #app {
-  max-width: 960px;
+  max-width: 920px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.75rem 1rem 2rem;
 }
 
-/* HEADER */
+/* ---------- HEADER ---------- */
+
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.app-title-wrap {
+  text-align: center;
+  margin: 0 auto;
 }
 
 .app-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
-  display: flex;
-  flex-direction: column;
+  letter-spacing: 0.08em;
 }
 
-.app-sub {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #64748b;
+.app-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
 }
 
 .icon-button {
@@ -49,23 +51,32 @@ body {
   font-size: 1rem;
 }
 
-/* BUBBLES */
-.top-bubbles {
+/* ---------- TOP ROW ---------- */
+
+.app-top-row {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
-  margin: 0.6rem 0 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
-.bubble {
-  width: 34px;
-  height: 34px;
+.circles-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.top-circle {
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.9);
-  box-shadow: 0 3px 8px rgba(15,23,42,0.18);
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  font-weight: 600;
 }
 
-/* CALENDAR HEADER */
+/* ---------- CALENDAR HEADER ---------- */
+
 .calendar-header {
   display: flex;
   align-items: center;
@@ -73,37 +84,43 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.month-wrapper {
+.month-header {
   flex: 1;
   text-align: center;
 }
 
 .month-label {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
 .hebrew-month-label {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #6b7280;
+  margin-top: 0.1rem;
 }
 
-.nav-button,
-.today-button {
+.nav-button {
   border: none;
   background: #e5e7eb;
   border-radius: 999px;
-  padding: 0.35rem 0.75rem;
+  padding: 0.3rem 0.75rem;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
 }
 
 .today-button {
+  border: none;
   background: #0ea5e9;
-  color: #ffffff;
+  color: white;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-/* WEEKDAYS */
+/* ---------- WEEKDAYS ---------- */
+
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -114,36 +131,38 @@ body {
   margin-bottom: 0.3rem;
 }
 
-/* CALENDAR GRID */
+/* ---------- GRID ---------- */
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.35rem;
 }
 
-/* DAY CELL */
+/* ---------- DAY CELL ---------- */
+
 .day-cell {
-  background: rgba(255,255,255,0.95);
-  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 1.2rem;
   padding: 0.45rem 0.5rem;
-  min-height: 80px;
+  min-height: 78px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(15,23,42,0.15);
-  transition: transform 0.09s ease, box-shadow 0.09s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
 }
 
 .day-cell:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15,23,42,0.18);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
 }
 
 .day-cell.other-month {
-  opacity: 0.45;
+  opacity: 0.38;
 }
 
 .day-header {
@@ -162,7 +181,6 @@ body {
   color: #6b7280;
 }
 
-/* TAGS */
 .day-tags {
   margin-top: 0.15rem;
   display: flex;
@@ -186,12 +204,11 @@ body {
   color: #92400e;
 }
 
-/* FOOTER */
 .day-footer {
+  margin-top: 0.25rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 0.25rem;
+  align-items: center;
 }
 
 .weather-chip {
@@ -215,14 +232,15 @@ body {
   outline: 2px solid #0ea5e9;
 }
 
-/* MODALS */
+/* ---------- MODALS ---------- */
+
 .modal {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 40;
+  z-index: 50;
 }
 
 .modal.hidden {
@@ -235,7 +253,7 @@ body {
   background: rgba(15, 23, 42, 0.5);
 }
 
-.modal-dialog {
+.modal-content {
   position: relative;
   background: #f9fafb;
   border-radius: 1.25rem;
@@ -243,14 +261,19 @@ body {
   width: min(480px, 95vw);
   max-height: 90vh;
   overflow: auto;
-  box-shadow: 0 20px 50px rgba(15,23,42,0.35);
-  z-index: 50;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.75rem;
+}
+
+.modal-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .modal-date-label {
@@ -264,40 +287,8 @@ body {
   color: #4b5563;
 }
 
-/* MODAL CONTENT */
-.modal-section {
-  margin-bottom: 0.8rem;
-}
+/* ---------- EVENTS LIST ---------- */
 
-.modal-section h3 {
-  margin: 0 0 0.4rem;
-  font-size: 0.95rem;
-}
-
-.modal-buttons-row {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.chip-button {
-  border-radius: 999px;
-  border: none;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  background: #e5e7eb;
-}
-
-/* WEATHER DETAILS */
-.weather-details {
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-  background: #e0f2fe;
-  padding: 0.4rem 0.5rem;
-  border-radius: 0.75rem;
-}
-
-/* EVENTS LIST */
 .events-list {
   list-style: none;
   padding: 0;
@@ -311,7 +302,7 @@ body {
   background: #ffffff;
   padding: 0.45rem 0.5rem;
   border-radius: 1rem;
-  box-shadow: 0 1px 4px rgba(15,23,42,0.12);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
 }
 
 .event-title {
@@ -326,7 +317,7 @@ body {
 }
 
 .event-actions {
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   display: flex;
   gap: 0.4rem;
 }
@@ -349,14 +340,8 @@ body {
   color: #166534;
 }
 
-/* EMPTY HINT */
-.empty-hint {
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-}
+/* ---------- FORM / BUTTONS ---------- */
 
-/* FORM */
 .form-row {
   margin-bottom: 0.5rem;
   display: flex;
@@ -385,6 +370,7 @@ body {
   border-radius: 999px;
   padding: 0.45rem 1rem;
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
 .secondary-button {
@@ -394,19 +380,40 @@ body {
   border-radius: 999px;
   padding: 0.4rem 1rem;
   cursor: pointer;
+  font-size: 0.9rem;
 }
+
+.primary-button.small,
+.secondary-button.small {
+  padding-inline: 0.7rem;
+  font-size: 0.8rem;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.event-form-wrap.hidden,
+.day-weather-panel.hidden {
+  display: none;
+}
+
+/* ---------- DAY WEATHER PANEL ---------- */
+
+.day-weather-panel {
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 1rem;
+  background: #e0f2fe;
+  font-size: 0.85rem;
+}
+
+/* ---------- SETTINGS MODAL ---------- */
 
 .modal-footer {
+  margin-top: 0.75rem;
   display: flex;
   justify-content: flex-end;
-}
-
-.help-text {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 0.2rem;
-}
-
-.hidden {
-  display: none !important;
 }

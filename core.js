@@ -123,7 +123,7 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   const first = new Date(year, month, 1);
-  const firstDay = (first.getDay() + 6) % 7;
+  const firstDay = first.getDay();
   const days = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
 

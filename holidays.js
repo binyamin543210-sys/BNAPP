@@ -75,7 +75,6 @@ function getHolidayTag(type) {
 }
 
 function isShabbat(dateObj) {
-  // שבת = שבת גרגוריאנית (שבת בערב היא כבר היום הזה)
   return dateObj.getDay() === 6;
 }
 

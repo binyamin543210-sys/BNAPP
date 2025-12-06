@@ -1,5 +1,5 @@
 // core.js
-// מנוע הלוח שנה BNAPP ULTRA – עם סנכרון Firebase
+// מנוע הלוח שנה BNAPP ULTRA – גרסה נקייה ומתוקנת
 
 const BNAPP = {
   today: new Date(),
@@ -7,18 +7,20 @@ const BNAPP = {
   viewMonth: null,
 
   settings: {
-    city: "Yavne",      // אפשר לשנות בעיר הגדרות
+    city: "Yavne",
     calendarId: "",
     defaultReminder: 30
   },
 
-  events: {},   // כל האירועים לפי תאריך YYYY-MM-DD
-  holidays: {}, // חגים לכל יום
-  shabbat: {},  // זמני שבת לכל יום
-  weather: {},  // מזג אוויר לכל יום
+  events: {}, 
+  holidays: {},
+  shabbat: {},
+  weather: {},
 };
 
-// ------------ כלי עזר ------------
+// ----------------------------------------------------
+// כלים כלליים
+// ----------------------------------------------------
 
 function fmt(d) {
   return d.toISOString().split("T")[0];
@@ -30,10 +32,12 @@ function dateFromKey(k) {
 }
 
 function dateKey(y, m, d) {
-  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  return `${y}-${String(m + 1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 }
 
-// ------------ הגדרות לוקאליות ------------
+// ----------------------------------------------------
+// טעינה ושמירה של הגדרות ואירועים
+// ----------------------------------------------------
 
 function loadSettings() {
   try {
@@ -59,7 +63,9 @@ function saveLocalEvents() {
   localStorage.setItem("bnapp_events", JSON.stringify(BNAPP.events));
 }
 
-// ------------ יצירת לוח שנה ------------
+// ----------------------------------------------------
+// יצירת לוח השנה
+// ----------------------------------------------------
 
 function renderCalendar() {
   const year = BNAPP.viewYear;
@@ -72,17 +78,17 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   const first = new Date(year, month, 1);
-  const firstDay = (first.getDay() + 6) % 7; // להתחיל מיום ראשון
+  const firstDay = (first.getDay() + 6) % 7;
   const days = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
 
-  const totalCells = 42;
-  for (let i = 0; i < totalCells; i++) {
+  const total = 42;
+
+  for (let i = 0; i < total; i++) {
     const cell = document.createElement("div");
     cell.className = "day-cell";
 
-    let dNum;
-    let dObj;
+    let dNum, dObj;
 
     if (i < firstDay) {
       dNum = prevDays - (firstDay - i - 1);
@@ -99,7 +105,6 @@ function renderCalendar() {
 
     const key = fmt(dObj);
 
-    // HEADER
     const header = document.createElement("div");
     header.className = "day-header";
 
@@ -115,11 +120,9 @@ function renderCalendar() {
     header.appendChild(heb);
     cell.appendChild(header);
 
-    // TAGS
     const tags = document.createElement("div");
     tags.className = "day-tags";
 
-    // שבת
     if (BNAPP.holidays[key]?.isShabbat) {
       const t = document.createElement("span");
       t.className = "tag-pill tag-shabbat";
@@ -127,8 +130,7 @@ function renderCalendar() {
       tags.appendChild(t);
     }
 
-    // חג/מועד
-    if (BNAPP.holidays[key]?.tags) {
+    if (BNAPP.holidays[key]?.tags?.length) {
       BNAPP.holidays[key].tags.forEach(tg => {
         const t = document.createElement("span");
         t.className = "tag-pill tag-holiday";
@@ -139,11 +141,9 @@ function renderCalendar() {
 
     cell.appendChild(tags);
 
-    // FOOTER – מזג אוויר / אירועים
     const footer = document.createElement("div");
     footer.className = "day-footer";
 
-    // מזג אוויר
     if (BNAPP.weather[key]) {
       const chip = document.createElement("div");
       chip.className = "weather-chip";
@@ -153,7 +153,6 @@ function renderCalendar() {
       footer.appendChild(document.createElement("div"));
     }
 
-    // נקודה לאירועים
     if (BNAPP.events[key]?.length) {
       const dot = document.createElement("div");
       dot.className = "events-dot";
@@ -162,24 +161,24 @@ function renderCalendar() {
 
     cell.appendChild(footer);
 
-    // היום
-    const t = BNAPP.today;
     if (
-      dObj.getFullYear() === t.getFullYear() &&
-      dObj.getMonth() === t.getMonth() &&
-      dObj.getDate() === t.getDate()
+      dObj.getFullYear() === BNAPP.today.getFullYear() &&
+      dObj.getMonth() === BNAPP.today.getMonth() &&
+      dObj.getDate() === BNAPP.today.getDate()
     ) {
       cell.classList.add("day-today");
     }
 
     cell.dataset.key = key;
-    cell.addEventListener("click", () => openDayModal(key));
+    cell.onclick = () => openDayModal(key);
 
     grid.appendChild(cell);
   }
 }
 
-// ------------ חלון יום ------------
+// ----------------------------------------------------
+// מודאל יום
+// ----------------------------------------------------
 
 function openDayModal(key) {
   const d = dateFromKey(key);
@@ -203,7 +202,7 @@ function openDayModal(key) {
   renderEvents(key);
 
   const modal = document.getElementById("day-modal");
-  modal.dataset.key = key; // חשוב לטופס!
+  modal.dataset.key = key;
   modal.classList.remove("hidden");
 }
 
@@ -211,7 +210,9 @@ function closeDayModal() {
   document.getElementById("day-modal").classList.add("hidden");
 }
 
-// ------------ אירועים ------------
+// ----------------------------------------------------
+// אירועים
+// ----------------------------------------------------
 
 function renderEvents(key) {
   const list = document.getElementById("events-list");
@@ -270,9 +271,7 @@ function addEvent(key, obj) {
   if (!BNAPP.events[key]) BNAPP.events[key] = [];
   BNAPP.events[key].push(obj);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId && window.Sync) {
-    Sync.syncSave(key, BNAPP.events[key]);
-  }
+
   renderCalendar();
   renderEvents(key);
 }
@@ -280,72 +279,51 @@ function addEvent(key, obj) {
 function deleteEvent(key, id) {
   BNAPP.events[key] = (BNAPP.events[key] || []).filter(e => e.id !== id);
   saveLocalEvents();
-  if (BNAPP.settings.calendarId && window.Sync) {
-    Sync.syncSave(key, BNAPP.events[key]);
-  }
   renderCalendar();
   renderEvents(key);
 }
 
 function toggleDone(key, id) {
-  const arr = BNAPP.events[key] || [];
+  const arr = BNAPP.events[key];
   arr.forEach(e => {
     if (e.id === id) e.done = !e.done;
   });
   saveLocalEvents();
-  if (BNAPP.settings.calendarId && window.Sync) {
-    Sync.syncSave(key, BNAPP.events[key]);
-  }
+
   renderCalendar();
   renderEvents(key);
 }
 
-// ------------ שמירת אירוע חדש מטופס ------------
-
-document.getElementById("event-form").addEventListener("submit", e => {
+document.getElementById("event-form").onsubmit = e => {
   e.preventDefault();
 
   const key = document.querySelector("#day-modal").dataset.key;
 
   const ev = {
     id: Date.now(),
-    title: document.getElementById("event-title").value.trim(),
-    time: document.getElementById("event-time").value,
-    address: document.getElementById("event-address").value.trim(),
-    notes: document.getElementById("event-notes").value.trim(),
-    reminder: Number(document.getElementById("event-reminder-mins").value) || 0,
+    title: event-title.value.trim(),
+    time: event-time.value,
+    address: event-address.value.trim(),
+    notes: event-notes.value.trim(),
+    reminder: Number(event-reminder-mins.value) || 0,
     done: false
   };
 
   if (!ev.title) return;
-
   addEvent(key, ev);
 
   document.getElementById("event-form").reset();
-});
+};
 
-// ------------ טעינת נתוני עברי / חג / שבת / מזג אוויר + סנכרון אירועים ------------
+// ----------------------------------------------------
+// טעינת נתוני עברי / חגים / שבת / מזג אוויר
+// ----------------------------------------------------
 
 async function loadMonthData() {
   const y = BNAPP.viewYear;
   const m = BNAPP.viewMonth;
 
-  // קודם – מושך אירועים מהענן (אם יש קוד לוח שנה)
-  if (BNAPP.settings.calendarId && window.Sync) {
-    try {
-      const cloud = await Sync.syncLoadMonth(y, m);
-      // מאחד עם לוקאל (ענן מנצח)
-      BNAPP.events = {
-        ...BNAPP.events,
-        ...cloud
-      };
-      saveLocalEvents();
-    } catch (e) {
-      console.error("Sync load error:", e);
-    }
-  }
-
-  // חגים + עברי
+  // חגים ותאריך עברי
   const h = await Holidays.getHolidaysForMonth(y, m);
   BNAPP.holidays = {};
 
@@ -355,10 +333,11 @@ async function loadMonthData() {
     if (isNaN(dObj)) continue;
 
     const heb = await Holidays.getHebrewDate(key);
+
     BNAPP.holidays[key] = {
       hebrew: heb,
       tags: [],
-      isShabbat: Holidays.isShabbat(dObj)
+      isShabbat: Holidays.isShabbat(dObj),
     };
 
     if (h[key]) {
@@ -380,7 +359,7 @@ async function loadMonthData() {
       BNAPP.shabbat[key] = {
         candle: sh.candleLighting,
         havdalah: sh.havdalah,
-        label: Shabbat.formatShabbatLabel(sh)
+        label: Shabbat.formatShabbatLabel(sh),
       };
     }
   }
@@ -389,45 +368,35 @@ async function loadMonthData() {
   BNAPP.weather = {};
   for (let d = 1; d <= 31; d++) {
     const key = dateKey(y, m, d);
-    const dObj = new Date(y, m, d);
-    if (isNaN(dObj)) continue;
-
-    const wx = await Weather.getWeatherForDate(BNAPP.settings.city, key);
-    if (wx) BNAPP.weather[key] = wx;
+    const w = await Weather.getWeatherForDate(BNAPP.settings.city, key);
+    if (w) BNAPP.weather[key] = w;
   }
 
   renderCalendar();
 }
 
-// ------------ הגדרות ------------
+// ----------------------------------------------------
+// הגדרות
+// ----------------------------------------------------
 
-document.getElementById("settings-btn").onclick = () =>
-  document.getElementById("settings-modal").classList.remove("hidden");
+settings-btn.onclick = () =>
+  settings-modal.classList.remove("hidden");
 
-document.getElementById("close-settings-modal").onclick = () =>
-  document.getElementById("settings-modal").classList.add("hidden");
+close-settings-modal.onclick = () =>
+  settings-modal.classList.add("hidden");
 
-document.getElementById("settings-save").onclick = () => {
-  BNAPP.settings.city =
-    document.getElementById("settings-city").value.trim() || "Yavne";
-  BNAPP.settings.calendarId =
-    document.getElementById("settings-calendar-id").value.trim();
-  BNAPP.settings.defaultReminder =
-    Number(document.getElementById("settings-default-reminder").value) || 30;
-
+settings-save.onclick = () => {
+  BNAPP.settings.city = settings-city.value.trim() || "Yavne";
   saveSettings();
-
-  if (BNAPP.settings.calendarId && window.Sync) {
-    Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
-  }
-
   loadMonthData();
-  document.getElementById("settings-modal").classList.add("hidden");
+  settings-modal.classList.add("hidden");
 };
 
-// ------------ ניווט חודשים ------------
+// ----------------------------------------------------
+// ניווט חודשים
+// ----------------------------------------------------
 
-document.getElementById("prev-month").onclick = () => {
+prev-month.onclick = () => {
   BNAPP.viewMonth--;
   if (BNAPP.viewMonth < 0) {
     BNAPP.viewMonth = 11;
@@ -436,7 +405,7 @@ document.getElementById("prev-month").onclick = () => {
   loadMonthData();
 };
 
-document.getElementById("next-month").onclick = () => {
+next-month.onclick = () => {
   BNAPP.viewMonth++;
   if (BNAPP.viewMonth > 11) {
     BNAPP.viewMonth = 0;
@@ -445,13 +414,15 @@ document.getElementById("next-month").onclick = () => {
   loadMonthData();
 };
 
-document.getElementById("today-btn").onclick = () => {
+today-btn.onclick = () => {
   BNAPP.viewYear = BNAPP.today.getFullYear();
   BNAPP.viewMonth = BNAPP.today.getMonth();
   loadMonthData();
 };
 
-// ------------ INIT ------------
+// ----------------------------------------------------
+// INIT
+// ----------------------------------------------------
 
 async function initBNAPP() {
   loadSettings();
@@ -460,14 +431,9 @@ async function initBNAPP() {
   BNAPP.viewYear = BNAPP.today.getFullYear();
   BNAPP.viewMonth = BNAPP.today.getMonth();
 
-  if (BNAPP.settings.calendarId && window.Sync) {
-    Sync.initFirebaseIfNeeded(BNAPP.settings.calendarId);
-  }
+  close-day-modal.onclick = closeDayModal;
 
   await loadMonthData();
-
-  // סגירת מודאל יום בלחיצה על X
-  document.getElementById("close-day-modal").onclick = closeDayModal;
 }
 
 initBNAPP();

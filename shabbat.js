@@ -1,79 +1,75 @@
 // shabbat.js
-// זמני כניסת / יציאת שבת לכל החודש לפי עיר
-// מחזיר מפת תאריכים: YYYY-MM-DD -> { candle, havdalah, full }
+// זמני כניסת/יציאת שבת לכל שבתות החודש לפי עיר
+// משתמש ב-hebcal "Jewish calendar" עם geo=city כדי לקבל זמנים אמיתיים לעיר
 
-function pad(n) {
-  return String(n).padStart(2, "0");
+// פורמט תאריך מקומי כמו ב-core.js: YYYY-MM-DD בלי בעיות UTC
+function shFmt(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
-function timeFromISO(iso) {
-  const d = new Date(iso);
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  return `${hh}:${mm}`;
-}
-
+// מחזיר מפה: YYYY-MM-DD -> { candle, havdalah, full }
+// full: "🕯️ כניסת שבת: HH:MM • ⭐ צאת שבת: HH:MM"
 async function getShabbatForMonth(city, year, month, daysInMonth) {
   if (!city) return {};
 
+  // hebcal מקבל חודש 1–12
+  const m = month + 1;
+
+  const url =
+    "https://www.hebcal.com/hebcal" +
+    `?cfg=json&v=1` +
+    `&maj=on&min=on&mod=on&nx=on&mf=on&ss=on&c=on&M=on` +
+    `&year=${year}&month=${m}` +
+    `&geo=city&city=${encodeURIComponent(city)}`;
+
   try {
-    const start = `${year}-${pad(month + 1)}-01`;
-    const end = `${year}-${pad(month + 1)}-${pad(daysInMonth)}`;
-
-    const url =
-      `https://www.hebcal.com/shabbat/?cfg=json&geo=city&city=${encodeURIComponent(
-        city
-      )}` +
-      `&start=${start}&end=${end}&M=on&lg=h`;
-
     const res = await fetch(url);
     const data = await res.json();
+    const items = data.items || [];
 
-    if (!data.items) return {};
-
-    const candles = [];
-    const havdalot = [];
-
-    for (const item of data.items) {
-      if (item.category === "candles") {
-        candles.push(item);
-      }
-      if (item.category === "havdalah") {
-        havdalot.push(item);
-      }
-    }
+    // candles = כניסת שבת/חג, havdalah = צאת שבת/חג
+    const candles = items.filter((it) => it.category === "candles");
+    const havdalot = items.filter((it) => it.category === "havdalah");
 
     const out = {};
 
-    const count = Math.min(candles.length, havdalot.length);
-
-    for (let i = 0; i < count; i++) {
+    const pairs = Math.min(candles.length, havdalot.length);
+    for (let i = 0; i < pairs; i++) {
       const c = candles[i];
       const h = havdalot[i];
 
-      const cTime = timeFromISO(c.date);
-      const hTime = timeFromISO(h.date);
+      const cDate = new Date(c.date);
+      const hDate = new Date(h.date);
+
+      const candleKey = shFmt(cDate); // בדרך כלל שישי
+      const havdalahKey = shFmt(hDate); // בדרך כלל שבת
+
+      const candleTime =
+        cDate.getHours().toString().padStart(2, "0") +
+        ":" +
+        cDate.getMinutes().toString().padStart(2, "0");
+      const havdalahTime =
+        hDate.getHours().toString().padStart(2, "0") +
+        ":" +
+        hDate.getMinutes().toString().padStart(2, "0");
 
       const full =
-        `🕯️ כניסת שבת: ${cTime}` +
-        ` • ⭐ צאת שבת: ${hTime}`;
+        `🕯️ כניסת שבת: ${candleTime} • ⭐ צאת שבת: ${havdalahTime}`;
 
-      const cKey = c.date.split("T")[0]; // יום שישי
-      const hKey = h.date.split("T")[0]; // מוצ"ש
+      // אותו אובייקט גם לשישי וגם לשבת – כדי שבחלונית של יום שיש גם וגם,
+      // וגם אם לוחצים על שבת רואים אותו טקסט מלא.
+      const obj = { candle: candleTime, havdalah: havdalahTime, full };
 
-      if (!out[cKey]) out[cKey] = { candle: null, havdalah: null, full: "" };
-      if (!out[hKey]) out[hKey] = { candle: null, havdalah: null, full: "" };
-
-      out[cKey].candle = cTime;
-      out[cKey].full = full;
-
-      out[hKey].havdalah = hTime;
-      out[hKey].full = full;
+      out[candleKey] = obj;
+      out[havdalahKey] = obj;
     }
 
     return out;
   } catch (e) {
-    console.error("Shabbat API error:", e);
+    console.error("Shabbat month error:", e);
     return {};
   }
 }

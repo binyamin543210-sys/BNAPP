@@ -1,6 +1,7 @@
 // core.js
-// מנוע הלוח שנה BNAPP ULTRA – יציב מתוקן
+// מנוע הלוח שנה BNAPP ULTRA – יציב מתוקן (כל שבתות החודש)
 
+// אובייקט מרכזי
 const BNAPP = {
   today: new Date(),
   viewYear: null,
@@ -8,16 +9,18 @@ const BNAPP = {
   settings: {
     city: "Yavne",
   },
-  events: {}, // YYYY-MM-DD -> array
-  holidays: {},
-  weather: {},
-  shabbat: {},
+  events: {},          // YYYY-MM-DD -> array
+  holidays: {},        // עברי + חג
+  weather: {},         // מזג אוויר ליום
+  shabbat: {},         // זמני שבת לחודש: key -> {candle, havdalah, full}
   hebrewMonthLabel: "",
 };
 
-// ---- helpers ----
+// ========================
+//   כלי עזר
+// ========================
 
-// מפתח תאריך ל-local (בלי UTC)
+// מפתח תאריך ל-local (בלי בעיות UTC)
 function fmt(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -31,10 +34,13 @@ function dateFromKey(k) {
 }
 
 function hebDateKey(y, m, d) {
-  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d)
+    .padStart(2, "0")}`;
 }
 
-// ---- settings + events (localStorage) ----
+// ========================
+//   הגדרות ואירועים (localStorage)
+// ========================
 
 function loadSettings() {
   try {
@@ -60,7 +66,9 @@ function saveLocalEvents() {
   localStorage.setItem("bnapp_events_v1", JSON.stringify(BNAPP.events));
 }
 
-// ---- recent cities ----
+// ========================
+//   ערים אחרונות
+// ========================
 
 function saveRecentCity(city) {
   if (!city) return;
@@ -95,7 +103,9 @@ function renderRecentCities() {
   });
 }
 
-// ---- calendar rendering ----
+// ========================
+//   רינדור לוח שנה
+// ========================
 
 function renderCalendar() {
   const year = BNAPP.viewYear;
@@ -125,7 +135,7 @@ function renderCalendar() {
   grid.innerHTML = "";
 
   const first = new Date(year, month, 1);
-  const firstDay = first.getDay(); // 0=Sunday ... 6=Saturday
+  const firstDay = first.getDay(); // 0=ראשון ... 6=שבת
   const days = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
 
@@ -153,6 +163,7 @@ function renderCalendar() {
 
     const key = fmt(dObj);
 
+    // --- header: מספר + עברי קצר ---
     const header = document.createElement("div");
     header.className = "day-header";
 
@@ -170,10 +181,10 @@ function renderCalendar() {
     header.appendChild(heb);
     cell.appendChild(header);
 
+    // --- תגיות (שבת + חגים) ---
     const tags = document.createElement("div");
     tags.className = "day-tags";
 
-    // שבת רק בשבת (שבת = 6)
     if (dObj.getDay() === 6) {
       const t = document.createElement("span");
       t.className = "tag-pill tag-shabbat";
@@ -192,6 +203,7 @@ function renderCalendar() {
 
     cell.appendChild(tags);
 
+    // --- פוטר: מזג אוויר + זמני שבת + נקודת אירועים ---
     const footer = document.createElement("div");
     footer.className = "day-footer";
 
@@ -203,20 +215,19 @@ function renderCalendar() {
       footer.appendChild(chip);
     }
 
-    // זמני שבת קצרים בתא (אם יש)
-    // זמני שבת קצרים בתא (אם יש)
+    // זמני שבת קצרים (רק אם יש)
     const sh = BNAPP.shabbat[key];
     if (sh) {
+      const dow = dObj.getDay();
       const sChip = document.createElement("div");
       sChip.className = "shabbat-chip";
-      const dow = dObj.getDay();
       let txt = "";
 
       if (dow === 5 && sh.candle) {
-        // שישי – רק כניסה
+        // שישי – כניסה בלבד
         txt = `🕯️ ${sh.candle}`;
       } else if (dow === 6 && sh.havdalah) {
-        // שבת – רק יציאה
+        // שבת – יציאה בלבד
         txt = `⭐ ${sh.havdalah}`;
       }
 
@@ -226,7 +237,7 @@ function renderCalendar() {
       }
     }
 
-
+    // נקודת אירועים
     if (BNAPP.events[key]?.length) {
       const dot = document.createElement("div");
       dot.className = "events-dot";
@@ -235,6 +246,7 @@ function renderCalendar() {
 
     cell.appendChild(footer);
 
+    // היום
     const t = BNAPP.today;
     if (
       dObj.getFullYear() === t.getFullYear() &&
@@ -251,7 +263,9 @@ function renderCalendar() {
   }
 }
 
-// ---- day modal ----
+// ========================
+//   חלון יום
+// ========================
 
 function openDayModal(key) {
   const d = dateFromKey(key);
@@ -270,7 +284,6 @@ function openDayModal(key) {
   const sh = BNAPP.shabbat[key];
   document.getElementById("modal-shabbat-label").textContent =
     sh && sh.full ? sh.full : "";
-
 
   if (BNAPP.weather[key]) {
     const wx = BNAPP.weather[key];
@@ -293,7 +306,9 @@ function closeDayModal() {
   document.getElementById("day-modal").classList.add("hidden");
 }
 
-// ---- events ----
+// ========================
+//   אירועים
+// ========================
 
 function renderEvents(key) {
   const list = document.getElementById("events-list");
@@ -376,14 +391,16 @@ function toggleDone(key, id) {
   renderEvents(key);
 }
 
-// ---- month data (holidays + weather + shabbat) ----
+// ========================
+//   טעינת חודש (עברי + חגים + מזג אוויר + שבת)
+// ========================
 
 async function loadMonthData() {
   const y = BNAPP.viewYear;
   const m = BNAPP.viewMonth;
   const daysInMonth = new Date(y, m + 1, 0).getDate();
 
-  // holidays + hebrew
+  // --- עברי + חגים ---
   const holidaysMap = await Holidays.getHolidaysForMonth(y, m);
   BNAPP.holidays = {};
 
@@ -411,7 +428,7 @@ async function loadMonthData() {
     }
   }
 
-  // weather
+  // --- מזג אוויר ---
   try {
     BNAPP.weather =
       (await Weather.getWeatherForMonth(BNAPP.settings.city, y, m)) || {};
@@ -420,24 +437,35 @@ async function loadMonthData() {
     BNAPP.weather = {};
   }
 
-  // shabbat – מפה מוכנה לכל החודש
-  try {
-    BNAPP.shabbat =
-      (await Shabbat.getShabbatForMonth(
+  // --- זמני שבת – לכל שבת בחודש ---
+  BNAPP.shabbat = {};
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dObj = new Date(y, m, d);
+    const dow = dObj.getDay();
+    // מחשבים רק עבור שישי ושבת
+    if (dow !== 5 && dow !== 6) continue;
+
+    const key = fmt(dObj);
+
+    try {
+      const times = await Shabbat.getShabbatTimes(
         BNAPP.settings.city,
-        y,
-        m,
-        daysInMonth
-      )) || {};
-  } catch (e) {
-    console.error("Shabbat load error", e);
-    BNAPP.shabbat = {};
+        key
+      );
+      if (times && (times.candle || times.havdalah)) {
+        BNAPP.shabbat[key] = Shabbat.formatShabbatForDay(dObj, times);
+      }
+    } catch (e) {
+      console.error("Shabbat load error", e);
+    }
   }
 
   renderCalendar();
 }
 
-// ---- init ----
+// ========================
+//   INIT
+// ========================
 
 async function initBNAPP() {
   loadSettings();

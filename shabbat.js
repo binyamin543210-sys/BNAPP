@@ -1,9 +1,11 @@
 // shabbat.js
-// חישוב זמני שבת לכל החודש לפי קואורדינטות (geo=pos)
+// זמני שבת לכל החודש לפי קואורדינטות (geo=pos) + מיפוי ערים נפוצות
 
 const Shabbat = (() => {
-
+  // ------ מיפוי שם עיר -> קואורדינטות ------
+  // אפשר להוסיף פה ערים חופשי (שם -> lat/lon)
   const CITY_COORDS = {
+    // ישראל
     "יבנה": { lat: 31.878, lon: 34.739 },
     "yavne": { lat: 31.878, lon: 34.739 },
 
@@ -23,87 +25,132 @@ const Shabbat = (() => {
     "חיפה": { lat: 32.794, lon: 34.989 },
     "haifa": { lat: 32.794, lon: 34.989 },
 
-    "ניו יורק": { lat: 40.7128, lon: -74.0060 },
-    "new york": { lat: 40.7128, lon: -74.0060 },
+    // כמה ערים בחו"ל
+    "ניו יורק": { lat: 40.7128, lon: -74.006 },
+    "new york": { lat: 40.7128, lon: -74.006 },
 
     "מיאמי": { lat: 25.7617, lon: -80.1918 },
     "miami": { lat: 25.7617, lon: -80.1918 },
 
     "לוס אנג'לס": { lat: 34.0522, lon: -118.2437 },
+    "לוס אנגלס": { lat: 34.0522, lon: -118.2437 },
     "los angeles": { lat: 34.0522, lon: -118.2437 },
 
     "לונדון": { lat: 51.5074, lon: -0.1278 },
     "london": { lat: 51.5074, lon: -0.1278 },
 
     "פריז": { lat: 48.8566, lon: 2.3522 },
-    "paris": { lat: 48.8566, lon: 2.3522 }
+    "paris": { lat: 48.8566, lon: 2.3522 },
   };
 
-  const DEFAULT_COORDS = CITY_COORDS["יבנה"];
+  const DEFAULT_COORDS = CITY_COORDS["yavne"]; // ברירת מחדל – יבנה
 
-  function normalizeCity(name) {
-    return name.toString().trim().toLowerCase().replace(/[\"׳״']/g, "");
+  // ניקוי שם עיר (אותיות קטנות, בלי גרשיים, בלי ריבוי רווחים)
+  function normalizeCityName(name) {
+    if (!name) return "";
+    return name
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[\"״׳']/g, "")
+      .replace(/\s+/g, " ");
   }
 
-  function getCoordsForCity(city) {
-    const norm = normalizeCity(city);
-    if (CITY_COORDS[norm]) return CITY_COORDS[norm];
+  function getCoordsForCity(cityName) {
+    const norm = normalizeCityName(cityName || "yavne");
+    if (CITY_COORDS[norm]) {
+      return CITY_COORDS[norm];
+    }
+    console.warn("Shabbat: unknown city, using default Yavne for:", cityName);
     return DEFAULT_COORDS;
   }
 
-  function fmt(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  // המרה לתאריך לוקאלי yyyy-mm-dd
+  function fmtLocalDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
 
-  async function getShabbatForMonth(city, year, monthIndex, daysInMonth) {
+  // -------------------------------------------------------------
+  // getShabbatForMonth(cityName, year, monthIndex, daysInMonth)
+  // מחזיר map:
+  //   key = "YYYY-MM-DD" -> { full, candle, havdalah }
+  // -------------------------------------------------------------
+  async function getShabbatForMonth(cityName, year, monthIndex, daysInMonth) {
+    const { lat, lon } = getCoordsForCity(cityName);
 
-    const { lat, lon } = getCoordsForCity(city);
+    // טווח תאריכים לחודש (קצת מרווח לא צריך – אבל מספיק)
+    const startDate = new Date(year, monthIndex, 1);
+    const endDate = new Date(year, monthIndex, daysInMonth);
 
-    const start = fmt(new Date(year, monthIndex, 1));
-    const end = fmt(new Date(year, monthIndex, daysInMonth));
+    const startStr = fmtLocalDate(startDate);
+    const endStr = fmtLocalDate(endDate);
 
     const url =
-      `https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${lat}&longitude=${lon}` +
-      `&start=${start}&end=${end}`;
+      "https://www.hebcal.com/shabbat" +
+      `?cfg=json&geo=pos&latitude=${lat}&longitude=${lon}` +
+      `&start=${encodeURIComponent(startStr)}` +
+      `&end=${encodeURIComponent(endStr)}`;
 
     let data;
     try {
       const res = await fetch(url);
-      if (!res.ok) return {};
+      if (!res.ok) {
+        console.error("Shabbat API HTTP error:", res.status, url);
+        return {};
+      }
       data = await res.json();
-    } catch {
+    } catch (e) {
+      console.error("Shabbat API fetch error:", e);
       return {};
     }
 
-    if (!data.items) return {};
-
     const map = {};
 
-    for (const it of data.items) {
-      const key = it.date?.split("T")[0];
-      if (!key) continue;
+    if (!data || !Array.isArray(data.items)) {
+      console.warn("Shabbat API: unexpected response", data);
+      return {};
+    }
 
-      if (!map[key]) map[key] = { candle: "", havdalah: "", full: "" };
+    // בניית מפת ימים
+    for (const item of data.items) {
+      if (!item || !item.date || !item.category) continue;
+      const key = item.date.split("T")[0]; // yyyy-mm-dd
 
-      if (it.category === "candles") {
-        map[key].candle = it.candles || it.title.replace(/.*:\s*/, "");
+      if (!map[key]) {
+        map[key] = { full: "", candle: "", havdalah: "" };
       }
 
-      if (it.category === "havdalah") {
-        map[key].havdalah = it.havdalah || it.title.replace(/.*:\s*/, "");
+      const cat = item.category;
+      const title = item.title || "";
+
+      if (cat === "candles") {
+        // לדוגמה: "Candle lighting: 16:25"
+        const time =
+          (item.candles || title.replace(/.*:\s*/, "") || "").trim();
+        map[key].candle = time;
+      } else if (cat === "havdalah") {
+        const time =
+          (item.havdalah || title.replace(/.*:\s*/, "") || "").trim();
+        map[key].havdalah = time;
       }
     }
 
-    for (const key in map) {
-      const o = map[key];
-      const arr = [];
-      if (o.candle) arr.push(`🕯️ כניסת שבת: ${o.candle}`);
-      if (o.havdalah) arr.push(`⭐ צאת שבת: ${o.havdalah}`);
-      o.full = arr.join(" • ");
+    // בניית טקסט מלא לכל יום שישי/שבת שבו קיים משהו
+    for (const key of Object.keys(map)) {
+      const obj = map[key];
+      const parts = [];
+      if (obj.candle) parts.push(`🕯️ כניסת שבת: ${obj.candle}`);
+      if (obj.havdalah) parts.push(`⭐ צאת שבת: ${obj.havdalah}`);
+      obj.full = parts.join(" • ");
     }
 
     return map;
   }
 
-  return { getShabbatForMonth };
+  return {
+    getShabbatForMonth,
+  };
 })();

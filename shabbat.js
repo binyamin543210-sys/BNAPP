@@ -1,48 +1,32 @@
-
 // shabbat.js
-// זמני כניסת ויציאת שבת/חג לפי Hebcal
+// זמני שבת
 
-async function getShabbatTimes(city, isoDate) {
-  if (!city) return null;
-  try {
-    const url =
-      `https://www.hebcal.com/shabbat/?cfg=json&geo=city&city=${encodeURIComponent(city)}&M=on&lg=h&start=${isoDate}&m=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!data.items) return null;
+const Shabbat = {
+  async getShabbatTimes(city, dateKey) {
+    try {
+      const url = `https://www.hebcal.com/shabbat/?cfg=json&city=${city}&geo=city&year=${dateKey.slice(0,4)}&month=${dateKey.slice(5,7)}&m=${dateKey.slice(8,10)}`;
+      const res = await fetch(url);
+      const data = await res.json();
 
-    let candleLighting = null;
-    let havdalah = null;
+      if (!data.items) return null;
 
-    for (const item of data.items) {
-      if (item.category === "candles") candleLighting = item.date;
-      if (item.category === "havdalah") havdalah = item.date;
+      let candle = null, havdalah = null;
+
+      data.items.forEach(i => {
+        if (i.category === "candles") candle = i.title;
+        if (i.category === "havdalah") havdalah = i.title;
+      });
+
+      return { candleLighting: candle, havdalah };
+    } catch {
+      return null;
     }
+  },
 
-    if (!candleLighting && !havdalah) return null;
-    return { candleLighting, havdalah };
-  } catch (e) {
-    console.error("Shabbat API error:", e);
-    return null;
+  formatShabbatLabel(obj) {
+    if (!obj || (!obj.candleLighting && !obj.havdalah)) return "";
+    return `כניסה: ${obj.candleLighting || "-"} | יציאה: ${obj.havdalah || "-"}`;
   }
-}
-
-function formatShabbatLabel(times) {
-  if (!times) return "";
-  let txt = "";
-  if (times.candleLighting) {
-    const t = new Date(times.candleLighting);
-    txt += `🕯️ כניסת שבת/חג: ${t.getHours().toString().padStart(2,"0")}:${t.getMinutes().toString().padStart(2,"0")}`;
-  }
-  if (times.havdalah) {
-    const t = new Date(times.havdalah);
-    if (txt) txt += " • ";
-    txt += `⭐ צאת שבת/חג: ${t.getHours().toString().padStart(2,"0")}:${t.getMinutes().toString().padStart(2,"0")}`;
-  }
-  return txt;
-}
-
-window.Shabbat = {
-  getShabbatTimes,
-  formatShabbatLabel,
 };
+
+window.Shabbat = Shabbat;

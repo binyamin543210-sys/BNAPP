@@ -202,6 +202,25 @@ const firstDay = (jsDay + 6) % 7; // 0=Monday ... 6=Sunday
     // ----- Footer (Weather + Events) -----
     const footer = document.createElement("div");
     footer.className = "day-footer";
+    // --- תצוגת כניסת/יציאת שבת בתוך הלוח ---
+const sh = BNAPP.shabbat[key];
+if (sh) {
+  const shDiv = document.createElement("div");
+  shDiv.className = "shabbat-inline";
+  
+  if (sh.includes("כניסת")) {
+    // ביום שישי
+    shDiv.textContent = "🕯️ " + sh.split("כניסת שבת: ")[1].split(" ")[0];
+  }
+
+  if (sh.includes("צאת")) {
+    // ביום שבת
+    shDiv.textContent = "⭐ " + sh.split("צאת שבת: ")[1].split(" ")[0];
+  }
+
+  footer.appendChild(shDiv);
+}
+
 
     const wxWrap = document.createElement("div");
     if (BNAPP.weather[key]) {

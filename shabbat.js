@@ -1,77 +1,69 @@
 // shabbat.js
-// זמני הדלקת נרות / צאת שבת לפי עיר, לכל החודש
+// זמנים מדויקים לפי Hebcal, עם תמיכה בעיר משתנה
 
-// מחזיר מפה של כל החודש:
-// { "YYYY-MM-DD": { candleLighting: "...", havdalah: "..." }, ... }
-async function getShabbatMonthTimes(city, year, month) {
-  if (!city) return {};
+const ShabbatAPI = {
+  baseUrl: "https://www.hebcal.com/shabbat/",
+};
 
+// מחזיר אובייקט עם candleLighting / havdalah ליום מסוים
+async function getShabbatTimes(city, isoDate) {
   try {
-    // month: 0-11 → ל־Hebcal צריך 1-12
-    const m = month + 1;
-
     const url =
-      `https://www.hebcal.com/hebcal?cfg=json&v=1` +
-      `&year=${year}&month=${m}` +
-      `&geo=city&city=${encodeURIComponent(city)}` +
-      `&ss=on&c=on&lg=h`;
+      `${ShabbatAPI.baseUrl}?cfg=json&geo=city` +
+      `&city=${encodeURIComponent(city)}` +
+      `&M=on&lg=h&start=${isoDate}&end=${isoDate}`;
 
     const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Shabbat API status", res.status);
+      return null;
+    }
     const data = await res.json();
+    if (!data.items) return null;
 
-    if (!data.items) return {};
+    let candleLighting = null;
+    let havdalah = null;
 
-    const result = {};
-
-    data.items.forEach(item => {
-      const dateKey = item.date.split("T")[0];
-
-      // הדלקת נרות
+    for (const item of data.items) {
       if (item.category === "candles") {
-        if (!result[dateKey]) result[dateKey] = {};
-        result[dateKey].candleLighting = item.date;
+        candleLighting = item.date;
       }
-
-      // צאת שבת
       if (item.category === "havdalah") {
-        if (!result[dateKey]) result[dateKey] = {};
-        result[dateKey].havdalah = item.date;
+        havdalah = item.date;
       }
-    });
+    }
 
-    return result;
-
+    return { candleLighting, havdalah };
   } catch (e) {
-    console.error("Shabbat monthly API error:", e);
-    return {};
+    console.error("Shabbat API error", e);
+    return null;
   }
 }
 
-// מייצר טקסט יפה מתזמני שבת ליום מסוים
-function formatShabbatLabel(times) {
+// עוזר להוציא שעה יפה מ־ISO
+function shabbatTimeLabel(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const hh = d.getHours().toString().padStart(2, "0");
+  const mm = d.getMinutes().toString().padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+// טקסט עבור יום בודד – משמש גם בחלון וגם בתא
+function formatShabbatForDay(dateObj, times) {
   if (!times) return "";
 
-  let txt = "";
-
-  if (times.candleLighting) {
-    const t = new Date(times.candleLighting);
-    const hh = t.getHours().toString().padStart(2, "0");
-    const mm = t.getMinutes().toString().padStart(2, "0");
-    txt += `🕯️ כניסת שבת: ${hh}:${mm}`;
+  const dow = dateObj.getDay(); // 5=שישי, 6=שבת
+  if (dow === 5 && times.candleLighting) {
+    return `🕯️ כניסת שבת: ${shabbatTimeLabel(times.candleLighting)}`;
   }
-
-  if (times.havdalah) {
-    const t = new Date(times.havdalah);
-    const hh = t.getHours().toString().padStart(2, "0");
-    const mm = t.getMinutes().toString().padStart(2, "0");
-    if (txt) txt += " • ";
-    txt += `⭐ צאת שבת: ${hh}:${mm}`;
+  if (dow === 6 && times.havdalah) {
+    return `⭐ צאת שבת: ${shabbatTimeLabel(times.havdalah)}`;
   }
-
-  return txt.trim();
+  return "";
 }
 
 window.Shabbat = {
-  getShabbatMonthTimes,
-  formatShabbatLabel,
+  getShabbatTimes,
+  formatShabbatForDay,
 };

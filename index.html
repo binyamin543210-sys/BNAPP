@@ -2,152 +2,154 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BNAPP - לוח שנה עברי־לועזי</title>
-
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
-
-  <script defer src="holidays.js"></script>
-  <script defer src="shabbat.js"></script>
-  <script defer src="weather.js"></script>
-  <script defer src="core.js"></script>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div id="app">
-
+    <!-- HEADER -->
     <header class="app-header">
       <div class="app-title-wrap">
-        <div class="app-title">BNAPP</div>
+        <h1 class="app-title">BNAPP</h1>
         <div class="app-subtitle">לוח שנה עברי־לועזי</div>
       </div>
-      <button id="settings-btn" class="icon-button" title="הגדרות">⚙️</button>
+      <button id="settings-btn" class="icon-button" title="הגדרות">
+        ⚙️
+      </button>
     </header>
 
-    <section class="app-top-row">
-      <div class="circles-row">
-        <button class="top-circle">1</button>
-        <button class="top-circle">2</button>
-        <button class="top-circle">3</button>
-        <button class="top-circle">4</button>
+    <!-- TOP CHIPS -->
+    <div class="top-row">
+      <div class="top-chips">
+        <button class="top-chip">1</button>
+        <button class="top-chip">2</button>
+        <button class="top-chip">3</button>
+        <button class="top-chip">4</button>
       </div>
-    </section>
+    </div>
 
-    <section class="calendar-header">
+    <!-- MONTH HEADER -->
+    <div class="calendar-header">
       <button id="prev-month" class="nav-button">‹</button>
-      <div class="month-header">
+      <div class="month-label-wrap">
         <div id="month-label" class="month-label"></div>
         <div id="hebrew-month-label" class="hebrew-month-label"></div>
       </div>
       <button id="next-month" class="nav-button">›</button>
+    </div>
+
+    <!-- TODAY BUTTON -->
+    <div class="today-wrap">
       <button id="today-btn" class="today-button">היום</button>
-    </section>
+    </div>
 
-    <section class="calendar-weekdays">
-      <div>א'</div>
-      <div>ב'</div>
-      <div>ג'</div>
-      <div>ד'</div>
-      <div>ה'</div>
-      <div>ו'</div>
-      <div>ש'</div>
-    </section>
+    <!-- WEEKDAYS -->
+    <div class="calendar-weekdays">
+      <div>א׳</div>
+      <div>ב׳</div>
+      <div>ג׳</div>
+      <div>ד׳</div>
+      <div>ה׳</div>
+      <div>ו׳</div>
+      <div>ש׳</div>
+    </div>
 
-    <section id="calendar-grid" class="calendar-grid"></section>
+    <!-- GRID -->
+    <div id="calendar-grid" class="calendar-grid"></div>
   </div>
 
-  <!-- חלון יום -->
+  <!-- DAY MODAL -->
   <div id="day-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
-
     <div class="modal-content">
-      <header class="modal-header">
-        <div class="modal-header-text">
+      <div class="modal-header">
+        <div>
           <div id="modal-date-label" class="modal-date-label"></div>
           <div id="modal-hebrew-label" class="modal-hebrew-label"></div>
           <div id="modal-shabbat-label" class="modal-shabbat-label"></div>
           <div id="modal-weather-label" class="modal-weather-label"></div>
         </div>
         <button id="close-day-modal" class="icon-button">✕</button>
-      </header>
+      </div>
 
-      <section class="modal-section">
-        <h3>אירועים ומשימות</h3>
-        <ul id="events-list" class="events-list"></ul>
-      </section>
+      <div class="modal-actions-row">
+        <button id="open-day-weather" class="secondary-button">
+          מזג אוויר ליום
+        </button>
+        <button id="open-add-event" class="primary-button">
+          + הוספת אירוע / משימה
+        </button>
+      </div>
 
-      <section class="modal-section">
-        <div class="modal-actions-row">
-          <button id="open-add-event" class="primary-button small">➕ הוספת אירוע / משימה</button>
-          <button id="open-day-weather" class="secondary-button small">☁️ מזג אוויר ליום</button>
-        </div>
+      <div id="day-weather-panel" class="day-weather-panel hidden"></div>
 
-        <div id="event-form-wrap" class="event-form-wrap hidden">
-          <form id="event-form">
-            <div class="form-row">
-              <label>כותרת</label>
-              <input id="event-title" required />
-            </div>
+      <div id="event-form-wrap" class="event-form-wrap hidden">
+        <form id="event-form">
+          <div class="form-row">
+            <label for="event-title">כותרת</label>
+            <input id="event-title" type="text" placeholder="למשל: רופא שיניים" />
+          </div>
+          <div class="form-row">
+            <label for="event-time">שעה</label>
+            <input id="event-time" type="time" />
+          </div>
+          <div class="form-row">
+            <label for="event-address">כתובת</label>
+            <input id="event-address" type="text" placeholder="רחוב, עיר" />
+          </div>
+          <div class="form-row">
+            <label for="event-notes">הערות</label>
+            <textarea id="event-notes" rows="2"></textarea>
+          </div>
+          <div class="form-row">
+            <label for="event-reminder-mins">תזכורת (דקות לפני)</label>
+            <input id="event-reminder-mins" type="number" min="0" step="5" />
+          </div>
+          <button type="submit" class="primary-button full-width">
+            שמור אירוע
+          </button>
+        </form>
+      </div>
 
-            <div class="form-row">
-              <label>שעה</label>
-              <input id="event-time" type="time" />
-            </div>
-
-            <div class="form-row">
-              <label>תיאור</label>
-              <textarea id="event-notes" rows="2"></textarea>
-            </div>
-
-            <div class="form-row">
-              <label>כתובת (ל-Waze)</label>
-              <input id="event-address" placeholder="רחוב + עיר" />
-            </div>
-
-            <div class="form-row">
-              <label>התראה לפני (דקות)</label>
-              <input id="event-reminder-mins" type="number" min="0" step="5" placeholder="ללא" />
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="primary-button">שמור</button>
-            </div>
-          </form>
-        </div>
-
-        <div id="day-weather-panel" class="day-weather-panel hidden"></div>
-      </section>
+      <h3 class="events-title">אירועים ומשימות</h3>
+      <ul id="events-list" class="events-list"></ul>
     </div>
   </div>
 
-  <!-- חלון הגדרות -->
+  <!-- SETTINGS MODAL -->
   <div id="settings-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
-
     <div class="modal-content">
-      <header class="modal-header">
-        <h2>הגדרות</h2>
+      <div class="modal-header">
+        <div class="modal-title">הגדרות</div>
         <button id="close-settings-modal" class="icon-button">✕</button>
-      </header>
+      </div>
 
-      <section class="modal-section">
-        <div class="form-row">
-          <label>עיר (שבת + מזג אוויר)</label>
-          <input id="settings-city" type="text" placeholder="לדוגמה: Yavne, Jerusalem, Tel Aviv">
-        </div>
+      <div class="form-row">
+        <label for="settings-city">עיר (מזג אוויר + זמני שבת)</label>
+        <input id="settings-city" type="text" placeholder="למשל: Yavne" />
+      </div>
 
-        <div class="form-row">
-          <label>ערים אחרונות:</label>
-          <div id="recent-cities" class="recent-cities-box"></div>
-        </div>
-      </section>
+      <div class="form-row">
+        <div class="recent-cities-label">ערים אחרונות</div>
+        <div id="recent-cities" class="recent-cities"></div>
+      </div>
 
-      <footer class="modal-footer">
-        <button id="settings-save" class="primary-button">שמור הגדרות</button>
-      </footer>
+      <div class="settings-actions">
+        <button id="settings-save" class="primary-button">שמור</button>
+        <button id="settings-cancel" class="secondary-button">
+          ביטול
+        </button>
+      </div>
     </div>
   </div>
 
+  <script src="holidays.js"></script>
+  <script src="weather.js"></script>
+  <script src="shabbat.js"></script>
+  <script src="core.js"></script>
 </body>
 </html>

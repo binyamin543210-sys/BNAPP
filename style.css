@@ -439,3 +439,9 @@ body {
 .recent-city-btn:hover {
   background: #cbd5e1;
 }
+.shabbat-inline {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  color: #b91c1c;
+  font-weight: 600;
+}

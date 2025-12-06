@@ -1,87 +1,101 @@
-//
 // holidays.js
-// מודול חגים ותאריך עברי עבור BNAPP
-//
+// שימוש ב-Hebcal לקבלת תאריכים עבריים וחגים
 
-// תאריך עברי ל־ISODate (YYYY-MM-DD)
-async function getHebrewDate(isoDate) {
-  try {
-    const url = `https://www.hebcal.com/converter?cfg=json&date=${isoDate}&g2h=1&strict=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.hebrew || "";
-  } catch (e) {
-    console.error("Hebrew date error:", e);
-    return "";
-  }
-}
+const HolidaysAPI = {
+  baseCal: "https://www.hebcal.com/hebcal/",
+  baseConv: "https://www.hebcal.com/converter/",
+};
 
-// חגים לחודש (year, month = 0-11)
+// לוח חגים לחודש מסוים – מחזיר map: YYYY-MM-DD -> [items...]
 async function getHolidaysForMonth(year, month) {
-  const m = month + 1;
+  const monthNum = month + 1;
   const url =
-    `https://www.hebcal.com/hebcal?cfg=json&v=1&maj=on&min=on&mod=on&nx=on&mf=on&ss=on&c=on&year=${year}&month=${m}&geo=none`;
+    `${HolidaysAPI.baseCal}?v=1&cfg=json&year=${year}&month=${monthNum}` +
+    `&maj=on&min=on&mod=on&nx=1&mf=on&ss=on&c=on`;
 
   try {
     const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Holidays status", res.status);
+      return {};
+    }
     const data = await res.json();
-    const holidays = {};
+    const map = {};
 
-    if (!data.items) return holidays;
-
-    data.items.forEach(item => {
-      const date = item.date.split("T")[0];
-      if (!holidays[date]) holidays[date] = [];
-      holidays[date].push({
-        title: item.title,
-        category: item.category
-      });
+    (data.items || []).forEach((item) => {
+      if (!item.date) return;
+      const key = item.date.substring(0, 10);
+      if (!map[key]) map[key] = [];
+      map[key].push(item);
     });
 
-    return holidays;
+    return map;
   } catch (e) {
-    console.error("Holiday fetch error:", e);
+    console.error("Holidays fetch error", e);
     return {};
   }
 }
 
-function classifyHoliday(holidayList) {
-  if (!holidayList || !holidayList.length) return null;
-
-  for (const h of holidayList) {
-    if (h.category === "holiday" || h.category === "major") return "holiday";
-    if (h.category === "minor") return "special";
-    if (h.category === "fast") return "fast";
-    if (h.category === "roshchodesh") return "roshchodesh";
+// תאריך עברי מלא ליום מסוים
+async function getHebrewDate(dateKey) {
+  try {
+    const url =
+      `${HolidaysAPI.baseConv}?cfg=json&date=${dateKey}&g2h=1&strict=1`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Hebrew date status", res.status);
+      return "";
+    }
+    const data = await res.json();
+    if (!data.hebrew) return "";
+    // לדוגמה: "י\"ד כסלו תשפ\"ו"
+    return data.hebrew;
+  } catch (e) {
+    console.error("Hebrew date error", e);
+    return "";
   }
-  return "special";
+}
+
+// זיהוי שבת – רק לפי יום בשבוע
+function isShabbat(dateObj) {
+  return dateObj.getDay() === 6;
+}
+
+// סוג החג – ממש בגדול, מספיק בשביל טאג אחד
+function classifyHoliday(items) {
+  if (!items || !items.length) return null;
+  const item = items[0];
+
+  if (item.subcat === "roshchodesh") return "ROSH_CHODESH";
+  if (item.subcat === "holiday") return "HOLIDAY";
+  if (item.subcat === "fast") return "FAST";
+
+  if (item.title && item.title.includes("חול המועד")) return "CHOL_HAMOED";
+  if (item.title && item.title.includes("ראש חודש")) return "ROSH_CHODESH";
+
+  return null;
 }
 
 function getHolidayTag(type) {
   if (!type) return null;
-
   switch (type) {
-    case "holiday":
+    case "HOLIDAY":
       return { text: "חג" };
-    case "fast":
-      return { text: "צום" };
-    case "roshchodesh":
+    case "CHOL_HAMOED":
+      return { text: "חוה״מ" };
+    case "ROSH_CHODESH":
       return { text: "ראש חודש" };
-    case "special":
-      return { text: "מועד" };
+    case "FAST":
+      return { text: "צום" };
     default:
       return null;
   }
 }
 
-function isShabbat(dateObj) {
-  return dateObj.getDay() === 6;
-}
-
 window.Holidays = {
-  getHebrewDate,
   getHolidaysForMonth,
+  getHebrewDate,
+  isShabbat,
   classifyHoliday,
   getHolidayTag,
-  isShabbat
 };
